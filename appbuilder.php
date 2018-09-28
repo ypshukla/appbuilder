@@ -88,7 +88,6 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         $string = file_get_contents($jsonpath);
                         $string = json_decode($string, true);
                         // Load xml file
-                        // $xmlpaths=array("$appsource/config.xml","$appsource/www/config.xml");
                         $xmlpaths=array("$appsource/config.xml");
                         foreach ($xmlpaths as $xmlpath) {
                             $xml = simplexml_load_file($xmlpath);
@@ -131,7 +130,7 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         shell_exec("/bin/cp $imagepath/$tplogo $appsource/src/assets/img/splash_logo.png");
                         shell_exec("/bin/cp $imagepath/$logo $appsource/src/assets/img/login_logo.png");
 
-                        shell_exec("cd $appsource ; /usr/local/bin/ionic cordova resources");
+                        shell_exec("cd $appsource ; /usr/bin/ionic cordova resources");
 
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='4' where id=$id");
 
@@ -146,8 +145,8 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         file_put_contents($csspath, $css);
 								
                         // shell_exec("cd $appsource ; /usr/bin/gulp");
-                        shell_exec("cd $appsource ; /usr/local/bin/gulp");
-                        shell_exec("cd $appsource ; /usr/local/bin/npm run ionic:build -- --prod");
+                        shell_exec("cd $appsource ; /usr/bin/gulp");
+                        shell_exec("cd $appsource ; /usr/bin/npm run ionic:build -- --prod");
 
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='5' where id=$id");
 
@@ -191,11 +190,11 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='6' where id=$id");
 
                     case 6: // Prepare git repo
-                        /* shell_exec("/usr/bin/git init $basepath/build/$id/and");
+                        shell_exec("/usr/bin/git init $basepath/build/$id/and");
                         shell_exec("/usr/bin/git init $basepath/build/$id/ios");
 
-                        shell_exec("cd $basepath/build/$id/and ; /usr/bin/git remote add origin git@github.com:vidyamantra/customapps.git");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git remote add origin git@github.com:vidyamantra/customapps.git");
+                        shell_exec("cd $basepath/build/$id/and ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git checkout -b and$id");
                         shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git checkout -b ios$id");
@@ -207,13 +206,13 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git commit -m \"ios$id\"");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id"); */
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id");
 
                         shell_exec("/bin/rm -rf $appsource");
 
-                        /* mysql_query("UPDATE mobile_app set anroidstage='7' where id=$id");
-                        mysql_query("UPDATE mobile_app set iosstage='7' where id=$id"); */
-
+                        mysqli_query($con,"UPDATE mobile_app set anroidstage='7' where id=$id");
+                        mysqli_query($con,"UPDATE mobile_app set iosstage='7' where id=$id");
+                        
                 }
             }
             //return $result;

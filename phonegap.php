@@ -1,8 +1,8 @@
 #!/usr/bin/php -q
 <?php
 
-$basepath = '/vz/appbuilder';
-$imagepath = '/var/www/moodleapp';
+$basepath = '/Applications/MAMP/htdocs/appbuilder';
+$imagepath = '/Applications/MAMP/htdocs/moodleapp';
 require_once("$basepath/PhonegapBuildApi.php");
 
 
@@ -43,11 +43,12 @@ if ($sql) {
             $icon = $sql_result['icon'];
             $logo = $sql_result['logo'];
             $splash = $sql_result['splash'];
+            $tplogo = $sql_result['tplogo'];
             $appcolor = $sql_result['appcolor'];
-	    $policyurl = $sql_result['policyurl'];
-	    $urlscheme = $sql_result['urlscheme'];	            
-	    $status = $sql_result['status'];
-            $build = $sql_result['build'];
+			$policyurl = $sql_result['policyurl'];
+			$urlscheme = $sql_result['urlscheme'];	            
+			$status = $sql_result['status'];
+			$build = $sql_result['build'];
             $version = $sql_result['version'];
             $autoupgrade = $sql_result['autoupgrade'];
 
@@ -68,7 +69,7 @@ if ($sql) {
 
                 case 7: // Build for Android
 
-                    $res = $api->createApplicationFromRepo('https://github.com/vidyamantra/customapps', array(
+                    $res = $api->createApplicationFromRepo('https://github.com/ypshukla/phonegapbuild', array(
                         'title' => "$appname.$id.and",
                         'private' => false,
                         'tag' => "and$id",
@@ -129,7 +130,7 @@ if ($sql) {
 
                 case 7: // Build for IOS
 
-                    $res = $api->createApplicationFromRepo('https://github.com/vidyamantra/customapps', array(
+                    $res = $api->createApplicationFromRepo('https://github.com/ypshukla/phonegapbuild', array(
                         'title' => "$appname.$id.ios",
                         'private' => false,
                         'tag' => "ios$id",
@@ -202,7 +203,8 @@ if ($sql) {
     function db_connect()
     {
 // MySQL Connect
-    $server_con = mysql_connect('localhost', 'appbuilder', 'aomqIPEthU2KUEcvF8qx');
+    //$server_con = mysql_connect('localhost', 'appbuilder', 'aomqIPEthU2KUEcvF8qx');
+    $server_con = mysqli_connect("localhost","root","Kp051108#","appbuilder");
         if (!$server_con || !mysql_select_db("appbuilder", $server_con)) {
             return false;
         }
