@@ -208,7 +208,7 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");
                         shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id");
 
-                        shell_exec("/bin/rm -rf $appsource");
+                        //shell_exec("/bin/rm -rf $appsource");
 
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='7' where id=$id");
                         mysqli_query($con,"UPDATE mobile_app set iosstage='7' where id=$id");
