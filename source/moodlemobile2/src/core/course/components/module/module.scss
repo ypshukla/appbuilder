@@ -1,4 +1,4 @@
-core-course-module {
+ion-app.app-root core-course-module {
     background: white;
     display: block;
 
@@ -7,12 +7,10 @@ core-course-module {
         min-height: 52px;
 
         &.item .item-inner {
-            padding-right: 0;
+            @include padding(null, 0, null, null);
         }
         .label {
-            margin-top: 0;
-            margin-right: 0;
-            margin-bottom: 0;
+            @include margin(0, 0, 0, null);
         }
         .core-module-icon {
             align-items: flex-start;
@@ -27,7 +25,8 @@ core-course-module {
         core-format-text {
             flex-grow: 2;
         }
-        .core-module-buttons {
+        .core-module-buttons,
+        .buttons.core-module-buttons {
             margin: 0;
         }
 
@@ -46,19 +45,19 @@ core-course-module {
         }
 
         .core-module-buttons-more .spinner {
-            right: 13px;
+            @include position(null, 13px, null, null);
             position: absolute;
         }
     }
 }
 
-.md core-course-module {
+ion-app.app-root.md core-course-module {
     .core-module-description {
-        padding-right: $label-md-margin-end;
+        @include padding(null, $label-md-margin-end, null, null);
         margin-bottom: $label-md-margin-bottom;
 
         .core-show-more {
-            padding-right: $label-md-margin-end;
+            @include padding(null, $label-md-margin-end, null, null);
         }
     }
 
@@ -82,13 +81,13 @@ core-course-module {
     }
 }
 
-.ios core-course-module {
+ion-app.app-root.ios core-course-module {
     .core-module-description {
-        padding-right: $label-ios-margin-end;
+        @include padding(null, $label-ios-margin-end, null, null);
         margin-bottom: $label-md-margin-bottom;
 
         .core-show-more {
-            padding-right: $label-ios-margin-end;
+            @include padding(null, $label-ios-margin-end, null, null);
         }
     }
 
@@ -107,13 +106,13 @@ core-course-module {
     }
 }
 
-.wp core-course-module {
+ion-app.app-root.wp core-course-module {
     .core-module-description {
-        padding-right: ($item-wp-padding-end / 2);
+        @include padding(null, $item-wp-padding-end / 2, null, null);
         margin-bottom: $label-md-margin-bottom;
 
         .core-show-more {
-            padding-right: ($item-wp-padding-end / 2);
+            @include padding(null, $item-wp-padding-end / 2, null, null);
         }
     }
 

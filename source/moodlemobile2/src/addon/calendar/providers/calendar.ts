@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { Injectable } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { CoreLoggerProvider } from '@providers/logger';
 import { CoreSitesProvider } from '@providers/sites';
 import { CoreSite } from '@classes/site';
@@ -131,7 +132,8 @@ export class AddonCalendarProvider {
 
     constructor(logger: CoreLoggerProvider, private sitesProvider: CoreSitesProvider, private groupsProvider: CoreGroupsProvider,
             private coursesProvider: CoreCoursesProvider, private timeUtils: CoreTimeUtilsProvider,
-            private localNotificationsProvider: CoreLocalNotificationsProvider, private configProvider: CoreConfigProvider) {
+            private localNotificationsProvider: CoreLocalNotificationsProvider, private configProvider: CoreConfigProvider,
+            private translate: TranslateService) {
         this.logger = logger.getInstance('AddonCalendarProvider');
         this.sitesProvider.createTablesFromSchema(this.tablesSchema);
     }
@@ -194,6 +196,30 @@ export class AddonCalendarProvider {
                 return event || this.getEventFromLocalDb(id);
             }).catch(() => {
                 return this.getEventFromLocalDb(id);
+            });
+        });
+    }
+
+    /**
+     * Get a calendar event by ID. This function returns more data than getEvent, but it isn't available in all Moodles.
+     *
+     * @param {number} id Event ID.
+     * @param {boolean} [refresh] True when we should update the event data.
+     * @param {string} [siteId] ID of the site. If not defined, use current site.
+     * @return {Promise<any>} Promise resolved when the event data is retrieved.
+     * @since 3.4
+     */
+    getEventById(id: number, siteId?: string): Promise<any> {
+        return this.sitesProvider.getSite(siteId).then((site) => {
+            const preSets = {
+                    cacheKey: this.getEventCacheKey(id)
+                },
+                data = {
+                    eventid: id
+                };
+
+            return site.read('core_calendar_get_calendar_event_by_id', data, preSets).then((response) => {
+                return response.event;
             });
         });
     }
@@ -395,6 +421,16 @@ export class AddonCalendarProvider {
     }
 
     /**
+     * Check if the get event by ID WS is available.
+     *
+     * @return {boolean} Whether it's available.
+     * @since 3.4
+     */
+    isGetEventByIdAvailable(): boolean {
+        return this.sitesProvider.wsAvailableInCurrentSite('core_calendar_get_calendar_event_by_id');
+    }
+
+    /**
      * Get the next events for all the sites and schedules their notifications.
      * If an event notification time is 0, cancel its scheduled notification (if any).
      * If local notification plugin is not enabled, resolve the promise.
@@ -460,6 +496,11 @@ export class AddonCalendarProvider {
                         title: event.name,
                         text: startDate.toLocaleString(),
                         at: dateTriggered,
+                        channelParams: {
+                            channelID: 'notifications',
+                            channelName: this.translate.instant('addon.notifications.notifications'),
+                            importance: 4 // IMPORTANCE_HIGH
+                        },
                         data: {
                             eventid: event.id,
                             siteid: siteId

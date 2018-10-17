@@ -16,6 +16,7 @@ import { Directive, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleCh
 import { Platform, NavController, Content } from 'ionic-angular';
 import { TranslateService } from '@ngx-translate/core';
 import { CoreAppProvider } from '@providers/app';
+import { CoreEventsProvider } from '@providers/events';
 import { CoreFilepoolProvider } from '@providers/filepool';
 import { CoreLoggerProvider } from '@providers/logger';
 import { CoreSitesProvider } from '@providers/sites';
@@ -53,12 +54,12 @@ export class CoreFormatTextDirective implements OnChanges {
                                  // Using this parameter will force display: block to calculate height better.
                                  // If you want to avoid this use class="inline" at the same time to use display: inline-block.
     @Input() fullOnClick?: boolean | string; // Whether it should open a new page with the full contents on click.
-                                             // Only if "max-height" is set and the content has been collapsed.
     @Input() fullTitle?: string; // Title to use in full view. Defaults to "Description".
     @Output() afterRender?: EventEmitter<any>; // Called when the data is rendered.
 
     protected element: HTMLElement;
-    protected clickListener;
+    protected showMoreDisplayed: boolean;
+    protected loadingChangedListener;
 
     constructor(element: ElementRef, private sitesProvider: CoreSitesProvider, private domUtils: CoreDomUtilsProvider,
             private textUtils: CoreTextUtilsProvider, private translate: TranslateService, private platform: Platform,
@@ -66,10 +67,12 @@ export class CoreFormatTextDirective implements OnChanges {
             private filepoolProvider: CoreFilepoolProvider, private appProvider: CoreAppProvider,
             private contentLinksHelper: CoreContentLinksHelperProvider, @Optional() private navCtrl: NavController,
             @Optional() private content: Content, @Optional() private svComponent: CoreSplitViewComponent,
-            private iframeUtils: CoreIframeUtilsProvider) {
+            private iframeUtils: CoreIframeUtilsProvider, private eventsProvider: CoreEventsProvider) {
         this.element = element.nativeElement;
         this.element.classList.add('opacity-hide'); // Hide contents until they're treated.
         this.afterRender = new EventEmitter();
+
+        this.element.addEventListener('click', this.elementClicked.bind(this));
     }
 
     /**
@@ -116,11 +119,16 @@ export class CoreFormatTextDirective implements OnChanges {
     protected adaptImage(elWidth: number, img: HTMLElement): void {
         const imgWidth = this.getElementWidth(img),
             // Element to wrap the image.
-            container = document.createElement('span');
+            container = document.createElement('span'),
+            originalWidth = img.attributes.getNamedItem('width');
 
-        const forcedWidth = parseInt(img.attributes.getNamedItem('width').value);
-        if (!isNaN(forcedWidth) && img.attributes.getNamedItem('width').value.indexOf('%') < 0) {
-            img.style.width = forcedWidth  + 'px';
+        const forcedWidth = parseInt(originalWidth && originalWidth.value);
+        if (!isNaN(forcedWidth)) {
+            if (originalWidth.value.indexOf('%') < 0) {
+                img.style.width = forcedWidth  + 'px';
+            } else {
+                img.style.width = forcedWidth  + '%';
+            }
         }
 
         container.classList.add('core-adapted-img-container');
@@ -168,17 +176,23 @@ export class CoreFormatTextDirective implements OnChanges {
      * Calculate the height and check if we need to display show more or not.
      */
     protected calculateHeight(): void {
-        // Height cannot be calculated if the element is not shown while calculating.
-        // Force shorten if it was previously shortened.
         // @todo: Work on calculate this height better.
-        const height = this.element.style.maxHeight ? 0 : this.getElementHeight(this.element);
+
+        // Remove max-height (if any) to calculate the real height.
+        const initialMaxHeight = this.element.style.maxHeight;
+        this.element.style.maxHeight = null;
+
+        const height = this.getElementHeight(this.element);
+
+        // Restore the max height now.
+        this.element.style.maxHeight = initialMaxHeight;
 
         // If cannot calculate height, shorten always.
         if (!height || height > this.maxHeight) {
-            if (!this.clickListener) {
+            if (!this.showMoreDisplayed) {
                 this.displayShowMore();
             }
-        } else if (this.clickListener) {
+        } else if (this.showMoreDisplayed) {
             this.hideShowMore();
         }
     }
@@ -201,20 +215,24 @@ export class CoreFormatTextDirective implements OnChanges {
         this.element.classList.add('core-shortened');
         this.element.style.maxHeight = this.maxHeight + 'px';
 
-        this.clickListener = this.elementClicked.bind(this, expandInFullview);
-
-        this.element.addEventListener('click', this.clickListener);
+        this.showMoreDisplayed = true;
     }
 
     /**
      * Listener to call when the element is clicked.
      *
-     * @param {boolean}  expandInFullview Whether to expand the text in a new view.
      * @param {MouseEvent} e Click event.
      */
-    protected elementClicked(expandInFullview: boolean, e: MouseEvent): void {
+    protected elementClicked(e: MouseEvent): void {
         if (e.defaultPrevented) {
             // Ignore it if the event was prevented by some other listener.
+            return;
+        }
+
+        const expandInFullview = this.utils.isTrueOrOne(this.fullOnClick) || false;
+
+        if (!expandInFullview && !this.showMoreDisplayed) {
+            // Nothing to do on click, just stop.
             return;
         }
 
@@ -254,6 +272,14 @@ export class CoreFormatTextDirective implements OnChanges {
             return;
         }
 
+        // In AOT the inputs and ng-reflect aren't in the DOM sometimes. Add them so styles are applied.
+        if (this.maxHeight && !this.element.getAttribute('maxHeight')) {
+            this.element.setAttribute('maxHeight', String(this.maxHeight));
+        }
+        if (!this.element.getAttribute('singleLine')) {
+            this.element.setAttribute('singleLine', String(this.utils.isTrueOrOne(this.singleLine)));
+        }
+
         this.text = this.text ? this.text.trim() : '';
 
         this.formatContents().then((div: HTMLElement) => {
@@ -263,11 +289,6 @@ export class CoreFormatTextDirective implements OnChanges {
             this.element.innerHTML = ''; // Remove current contents.
             if (this.maxHeight && div.innerHTML != '') {
 
-                // For some reason, in iOS the inputs and ng-reflect aren't in the DOM sometimes. Add it so styles are applied.
-                if (!this.element.getAttribute('maxHeight')) {
-                    this.element.setAttribute('maxHeight', String(this.maxHeight));
-                }
-
                 // Move the children to the current element to be able to calculate the height.
                 this.domUtils.moveChildren(div, this.element);
 
@@ -275,11 +296,21 @@ export class CoreFormatTextDirective implements OnChanges {
                 this.calculateHeight();
 
                 // Wait for images to load and calculate the height again if needed.
-                this.waitForImages().then((hasImgToLoad) => {
+                this.domUtils.waitForImages(this.element).then((hasImgToLoad) => {
                     if (hasImgToLoad) {
                         this.calculateHeight();
                     }
                 });
+
+                if (!this.loadingChangedListener) {
+                    // Recalculate the height if a parent core-loading displays the content.
+                    this.loadingChangedListener = this.eventsProvider.on(CoreEventsProvider.CORE_LOADING_CHANGED, (data) => {
+                        if (data.loaded && this.domUtils.closest(this.element.parentElement, '#' + data.uniqueId)) {
+                            // The format-text is inside the loading, re-calculate the height.
+                            this.calculateHeight();
+                        }
+                    });
+                }
             } else {
                 this.domUtils.moveChildren(div, this.element);
             }
@@ -329,7 +360,7 @@ export class CoreFormatTextDirective implements OnChanges {
             buttons = Array.from(div.querySelectorAll('.button'));
             elementsWithInlineStyles = Array.from(div.querySelectorAll('*[style]'));
             stopClicksElements = Array.from(div.querySelectorAll('button,input,select,textarea'));
-            frames = Array.from(div.querySelectorAll(CoreIframeUtilsProvider.FRAME_TAGS.join(',')));
+            frames = Array.from(div.querySelectorAll(CoreIframeUtilsProvider.FRAME_TAGS.join(',').replace(/iframe,?/, '')));
 
             // Walk through the content to find the links and add our directive to it.
             // Important: We need to look for links first because in 'img' we add new links without core-link.
@@ -456,9 +487,7 @@ export class CoreFormatTextDirective implements OnChanges {
         this.element.classList.remove('core-text-formatted');
         this.element.classList.remove('core-shortened');
         this.element.style.maxHeight = null;
-
-        this.element.removeEventListener('click', this.clickListener);
-        this.clickListener = null;
+        this.showMoreDisplayed = false;
     }
 
     /**
@@ -490,6 +519,8 @@ export class CoreFormatTextDirective implements OnChanges {
 
         // Replace video tag by the iframe.
         video.parentNode.replaceChild(iframe, video);
+
+        this.iframeUtils.treatFrame(iframe);
     }
 
     /**
@@ -525,12 +556,26 @@ export class CoreFormatTextDirective implements OnChanges {
      *
      * @param {HTMLIFrameElement} iframe Iframe to treat.
      * @param {CoreSite} site Site instance.
-     * @param  {Boolean} canTreatVimeo Whether Vimeo videos can be treated in the site.
+     * @param {boolean} canTreatVimeo Whether Vimeo videos can be treated in the site.
      */
     protected treatIframe(iframe: HTMLIFrameElement, site: CoreSite, canTreatVimeo: boolean): void {
+        const src = iframe.src,
+            currentSite = this.sitesProvider.getCurrentSite();
+
         this.addMediaAdaptClass(iframe);
 
-        if (iframe.src && canTreatVimeo) {
+        if (currentSite && currentSite.containsUrl(src)) {
+            // URL points to current site, try to use auto-login.
+            currentSite.getAutoLoginUrl(src, false).then((finalUrl) => {
+                iframe.src = finalUrl;
+
+                this.iframeUtils.treatFrame(iframe);
+            });
+
+            return;
+        }
+
+        if (src && canTreatVimeo) {
             // Check if it's a Vimeo video. If it is, use the wsplayer script instead to make restricted videos work.
             const matches = iframe.src.match(/https?:\/\/player\.vimeo\.com\/video\/([0-9]+)/);
             if (matches && matches[1]) {
@@ -580,39 +625,8 @@ export class CoreFormatTextDirective implements OnChanges {
                 }
             }
         }
-    }
 
-    /**
-     * Wait for images to load.
-     *
-     * @return {Promise<boolean>} Promise resolved with a boolean: whether there was any image to load.
-     */
-    protected waitForImages(): Promise<boolean> {
-        const imgs = Array.from(this.element.querySelectorAll('img')),
-            promises = [];
-        let hasImgToLoad = false;
-
-        imgs.forEach((img) => {
-            if (img && !img.complete) {
-                hasImgToLoad = true;
-
-                // Wait for image to load or fail.
-                promises.push(new Promise((resolve, reject): void => {
-                    const imgLoaded = (): void => {
-                        resolve();
-                        img.removeEventListener('loaded', imgLoaded);
-                        img.removeEventListener('error', imgLoaded);
-                    };
-
-                    img.addEventListener('load', imgLoaded);
-                    img.addEventListener('error', imgLoaded);
-                }));
-            }
-        });
-
-        return Promise.all(promises).then(() => {
-            return hasImgToLoad;
-        });
+        this.iframeUtils.treatFrame(iframe);
     }
 
     /**

@@ -81,13 +81,21 @@ export class AddonModForumIndexComponent extends CoreCourseModuleMainActivityCom
         }, this.siteId);
 
         // Listen for discussions added. When a discussion is added, we reload the data.
-        this.newDiscObserver = this.eventsProvider.on(AddonModForumProvider.NEW_DISCUSSION_EVENT, this.eventReceived.bind(this));
-        this.replyObserver = this.eventsProvider.on(AddonModForumProvider.REPLY_DISCUSSION_EVENT, this.eventReceived.bind(this));
+        this.newDiscObserver = this.eventsProvider.on(AddonModForumProvider.NEW_DISCUSSION_EVENT,
+                this.eventReceived.bind(this, true));
+        this.replyObserver = this.eventsProvider.on(AddonModForumProvider.REPLY_DISCUSSION_EVENT,
+                this.eventReceived.bind(this, false));
 
         // Select the current opened discussion.
         this.viewDiscObserver = this.eventsProvider.on(AddonModForumProvider.VIEW_DISCUSSION_EVENT, (data) => {
             if (this.forum && this.forum.id == data.forumId) {
                 this.selectedDiscussion = this.splitviewCtrl.isOn() ? data.discussion : 0;
+
+                // Invalidate discussion list if it was not read.
+                const discussion = this.discussions.find((disc) => disc.discussion == data.discussion);
+                if (discussion && discussion.numunread > 0) {
+                    this.forumProvider.invalidateDiscussionsList(this.forum.id);
+                }
             }
         }, this.sitesProvider.getCurrentSiteId());
 
@@ -299,13 +307,16 @@ export class AddonModForumIndexComponent extends CoreCourseModuleMainActivityCom
     /**
      * Convenience function to load more forum discussions.
      *
+     * @param {any} [infiniteComplete] Infinite scroll complete function. Only used from core-infinite-loading.
      * @return {Promise<any>} Promise resolved when done.
      */
-    protected fetchMoreDiscussions(): Promise<any> {
+    fetchMoreDiscussions(infiniteComplete?: any): Promise<any> {
         return this.fetchDiscussions(false).catch((message) => {
             this.domUtils.showErrorModalDefault(message, 'addon.mod_forum.errorgetforum', true);
 
             this.canLoadMore = false; // Set to false to prevent infinite calls with infinite-loading.
+        }).finally(() => {
+            infiniteComplete && infiniteComplete();
         });
     }
 
@@ -383,11 +394,33 @@ export class AddonModForumIndexComponent extends CoreCourseModuleMainActivityCom
     /**
      * Function called when we receive an event of new discussion or reply to discussion.
      *
+     * @param {boolean} isNewDiscussion Whether it's a new discussion event.
      * @param {any} data Event data.
      */
-    protected eventReceived(data: any): void {
+    protected eventReceived(isNewDiscussion: boolean, data: any): void {
         if ((this.forum && this.forum.id === data.forumId) || data.cmId === this.module.id) {
-            this.showLoadingAndRefresh(false);
+            if (isNewDiscussion && this.splitviewCtrl.isOn()) {
+                // Discussion added, clear details page.
+                this.splitviewCtrl.emptyDetails();
+            }
+
+            this.showLoadingAndRefresh(false).finally(() => {
+                // If it's a new discussion in tablet mode, try to open it.
+                if (isNewDiscussion && this.splitviewCtrl.isOn()) {
+
+                    if (data.discussionId) {
+                        // Discussion sent to server, search it in the list of discussions.
+                        const discussion = this.discussions.find((disc) => { return disc.discussion == data.discussionId; });
+                        if (discussion) {
+                            this.openDiscussion(discussion);
+                        }
+
+                    } else if (data.discTimecreated) {
+                        // It's an offline discussion, open it.
+                        this.openNewDiscussion(data.discTimecreated);
+                    }
+                }
+            });
 
             // Check completion since it could be configured to complete once the user adds a new discussion or replies.
             this.courseProvider.checkModuleCompletion(this.courseId, this.module.completionstatus);
@@ -406,7 +439,7 @@ export class AddonModForumIndexComponent extends CoreCourseModuleMainActivityCom
             forumId: this.forum.id,
             discussionId: discussion.discussion,
             trackPosts: this.trackPosts,
-            locked: discussion.locked && !discussion.canreply
+            locked: discussion.locked
         };
         this.splitviewCtrl.push('AddonModForumDiscussionPage', params);
     }
@@ -424,6 +457,8 @@ export class AddonModForumIndexComponent extends CoreCourseModuleMainActivityCom
             timeCreated: timeCreated,
         };
         this.splitviewCtrl.push('AddonModForumNewDiscussionPage', params);
+
+        this.selectedDiscussion = 0;
     }
 
     /**

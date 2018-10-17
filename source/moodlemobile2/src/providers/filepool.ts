@@ -418,7 +418,7 @@ export class CoreFilepoolProvider {
 
     protected logger;
     protected appDB: SQLiteDB;
-    protected tokenRegex = new RegExp('(\\?|&)token=([A-Za-z0-9]+)');
+    protected tokenRegex = new RegExp('(\\?|&)token=([A-Za-z0-9]*)');
     protected queueState: string;
     protected urlAttributes = [
         this.tokenRegex,
@@ -775,7 +775,7 @@ export class CoreFilepoolProvider {
 
             // Calculate the size of the file.
             return promise.then((size) => {
-                const isWifi = !this.appProvider.isNetworkAccessLimited(),
+                const isWifi = this.appProvider.isWifi(),
                     sizeUnknown = size <= 0;
 
                 if (!sizeUnknown) {

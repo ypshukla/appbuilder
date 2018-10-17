@@ -32,6 +32,7 @@ import { CoreContextMenuComponent } from './context-menu/context-menu';
 import { CoreContextMenuItemComponent } from './context-menu/context-menu-item';
 import { CoreContextMenuPopoverComponent } from './context-menu/context-menu-popover';
 import { CoreCoursePickerMenuPopoverComponent } from './course-picker-menu/course-picker-menu-popover';
+import { CoreChartComponent } from './chart/chart';
 import { CoreChronoComponent } from './chrono/chrono';
 import { CoreLocalFileComponent } from './local-file/local-file';
 import { CoreSitePickerComponent } from './site-picker/site-picker';
@@ -48,6 +49,7 @@ import { CoreNavigationBarComponent } from './navigation-bar/navigation-bar';
 import { CoreAttachmentsComponent } from './attachments/attachments';
 import { CoreIonTabsComponent } from './ion-tabs/ion-tabs';
 import { CoreIonTabComponent } from './ion-tabs/ion-tab';
+import { CoreInfiniteLoadingComponent } from './infinite-loading/infinite-loading';
 
 @NgModule({
     declarations: [
@@ -66,6 +68,7 @@ import { CoreIonTabComponent } from './ion-tabs/ion-tab';
         CoreContextMenuItemComponent,
         CoreContextMenuPopoverComponent,
         CoreCoursePickerMenuPopoverComponent,
+        CoreChartComponent,
         CoreChronoComponent,
         CoreLocalFileComponent,
         CoreSitePickerComponent,
@@ -81,7 +84,8 @@ import { CoreIonTabComponent } from './ion-tabs/ion-tab';
         CoreNavigationBarComponent,
         CoreAttachmentsComponent,
         CoreIonTabsComponent,
-        CoreIonTabComponent
+        CoreIonTabComponent,
+        CoreInfiniteLoadingComponent
     ],
     entryComponents: [
         CoreContextMenuPopoverComponent,
@@ -108,6 +112,7 @@ import { CoreIonTabComponent } from './ion-tabs/ion-tab';
         CoreIconComponent,
         CoreContextMenuComponent,
         CoreContextMenuItemComponent,
+        CoreChartComponent,
         CoreChronoComponent,
         CoreLocalFileComponent,
         CoreSitePickerComponent,
@@ -122,7 +127,8 @@ import { CoreIonTabComponent } from './ion-tabs/ion-tab';
         CoreNavigationBarComponent,
         CoreAttachmentsComponent,
         CoreIonTabsComponent,
-        CoreIonTabComponent
+        CoreIonTabComponent,
+        CoreInfiniteLoadingComponent
     ]
 })
 export class CoreComponentsModule {}

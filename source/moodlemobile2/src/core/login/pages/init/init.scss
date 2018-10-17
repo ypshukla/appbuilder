@@ -1,4 +1,4 @@
-page-core-login-init {
+ion-app.app-root page-core-login-init {
     .scroll-content {
         background-color: $core-color-init-screen; /* Change this to add a bg image or change color */
         background: -webkit-radial-gradient($core-color-init-screen-alt, $core-color-init-screen);
@@ -8,10 +8,7 @@ page-core-login-init {
     }
     .core-bglogo {
         position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        @include position(0, 0, 0, 0);
         height: 100%;
         width: 100%;
         display: table;

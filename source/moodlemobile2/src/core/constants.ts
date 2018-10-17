@@ -30,7 +30,8 @@ export class CoreConstants {
     static SETTINGS_RICH_TEXT_EDITOR = 'CoreSettingsRichTextEditor';
     static SETTINGS_NOTIFICATION_SOUND = 'CoreSettingsNotificationSound';
     static SETTINGS_SYNC_ONLY_ON_WIFI = 'CoreSettingsSyncOnlyOnWifi';
-    static SETTINGS_REPORT_IN_BACKGROUND = 'CoreSettingsReportInBackground';
+    static SETTINGS_DEBUG_DISPLAY = 'CoreSettingsDebugDisplay';
+    static SETTINGS_REPORT_IN_BACKGROUND = 'CoreSettingsReportInBackground'; // @deprecated since 3.5.0
 
     // WS constants.
     static WS_TIMEOUT = 30000;
@@ -47,4 +48,13 @@ export class CoreConstants {
     static NOT_DOWNLOADED = 'notdownloaded';
     static OUTDATED = 'outdated';
     static NOT_DOWNLOADABLE = 'notdownloadable';
+
+    // Constants from Moodle's resourcelib.
+    static RESOURCELIB_DISPLAY_AUTO = 0; // Try the best way.
+    static RESOURCELIB_DISPLAY_EMBED = 1; // Display using object tag.
+    static RESOURCELIB_DISPLAY_FRAME = 2; // Display inside frame.
+    static RESOURCELIB_DISPLAY_NEW = 3; // Display normal link in new window.
+    static RESOURCELIB_DISPLAY_DOWNLOAD = 4; // Force download of file instead of display.
+    static RESOURCELIB_DISPLAY_OPEN = 5; // Open directly.
+    static RESOURCELIB_DISPLAY_POPUP = 6; // Open in "emulated" pop-up without navigation.
 }

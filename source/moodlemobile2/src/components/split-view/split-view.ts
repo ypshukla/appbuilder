@@ -15,7 +15,8 @@
 // Code based on https://github.com/martinpritchardelevate/ionic-split-pane-demo
 
 import { Component, ViewChild, Input, ElementRef, OnInit, Optional, OnDestroy } from '@angular/core';
-import { NavController, Nav, ViewController } from 'ionic-angular';
+import { NavController, Nav, ViewController, Platform, Menu } from 'ionic-angular';
+import { TranslateService } from '@ngx-translate/core';
 import { CoreFileUploaderProvider } from '@core/fileuploader/providers/fileuploader';
 import { Subscription } from 'rxjs';
 
@@ -45,7 +46,9 @@ import { Subscription } from 'rxjs';
 export class CoreSplitViewComponent implements OnInit, OnDestroy {
 
     @ViewChild('detailNav') detailNav: Nav;
+    @ViewChild('menu') menu: Menu;
     @Input() when?: string | boolean = 'md';
+
     protected isEnabled = false;
     protected masterPageName = '';
     protected masterPageIndex = 0;
@@ -56,15 +59,26 @@ export class CoreSplitViewComponent implements OnInit, OnDestroy {
     protected originalMasterCanLeave: Function;
     protected ignoreSplitChanged = false;
     protected audioCaptureSubscription: Subscription;
+    protected languageChangedSubscription: Subscription;
 
     // Empty placeholder for the 'detail' page.
     detailPage: any = null;
+    side: string;
 
-    constructor(@Optional() private masterNav: NavController, element: ElementRef, fileUploaderProvider: CoreFileUploaderProvider) {
+    constructor(@Optional() private masterNav: NavController, element: ElementRef, fileUploaderProvider: CoreFileUploaderProvider,
+            platform: Platform, translate: TranslateService) {
         this.element = element.nativeElement;
 
         this.audioCaptureSubscription = fileUploaderProvider.onAudioCapture.subscribe((starting) => {
             this.ignoreSplitChanged = starting;
+        });
+
+        // Change the side when the language changes.
+        this.languageChangedSubscription = translate.onLangChange.subscribe((event: any) => {
+            setTimeout(() => {
+                this.side = platform.isRTL ? 'right' : 'left';
+                this.menu.setElementAttribute('side', this.side);
+            });
         });
     }
 
@@ -109,6 +123,10 @@ export class CoreSplitViewComponent implements OnInit, OnDestroy {
     handleCanLeave(): void {
         // Listen for the didEnter event on the details nav to detect everytime a page is loaded.
         this.detailsDidEnterSubscription = this.detailNav.viewDidEnter.subscribe((detailsViewController: ViewController) => {
+            if (!this.isOn()) {
+                return;
+            }
+
             const masterViewController = this.masterNav.getActive();
 
             if (this.masterCanLeaveOverridden) {
@@ -133,7 +151,7 @@ export class CoreSplitViewComponent implements OnInit, OnDestroy {
                     return Promise.resolve().then(() => {
                         if (this.originalMasterCanLeave) {
                             // First call the master canLeave.
-                            const result = this.originalMasterCanLeave();
+                            const result = this.originalMasterCanLeave.apply(masterViewController.instance);
                             if (typeof result == 'boolean' && !result) {
                                 // User cannot leave, return a rejected promise so the details canLeave isn't executed.
                                 return Promise.reject(null);
@@ -240,5 +258,6 @@ export class CoreSplitViewComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.detailsDidEnterSubscription && this.detailsDidEnterSubscription.unsubscribe();
         this.audioCaptureSubscription.unsubscribe();
+        this.languageChangedSubscription.unsubscribe();
     }
 }

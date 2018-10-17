@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import { Injectable, NgZone } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { TranslateService } from '@ngx-translate/core';
 import { Badge } from '@ionic-native/badge';
 import { Push, PushObject, PushOptions } from '@ionic-native/push';
 import { Device } from '@ionic-native/device';
 import { CoreAppProvider } from '@providers/app';
+import { CoreInitDelegate } from '@providers/init';
 import { CoreLoggerProvider } from '@providers/logger';
 import { CoreSitesProvider } from '@providers/sites';
 import { AddonPushNotificationsDelegate } from './delegate';
@@ -61,11 +62,12 @@ export class AddonPushNotificationsProvider {
         }
     ];
 
-    constructor(logger: CoreLoggerProvider, protected appProvider: CoreAppProvider, private platform: Platform,
+    constructor(logger: CoreLoggerProvider, protected appProvider: CoreAppProvider, private initDelegate: CoreInitDelegate,
             protected pushNotificationsDelegate: AddonPushNotificationsDelegate, protected sitesProvider: CoreSitesProvider,
             private badge: Badge, private localNotificationsProvider: CoreLocalNotificationsProvider,
             private utils: CoreUtilsProvider, private textUtils: CoreTextUtilsProvider, private push: Push,
-            private configProvider: CoreConfigProvider, private device: Device, private zone: NgZone) {
+            private configProvider: CoreConfigProvider, private device: Device, private zone: NgZone,
+            private translate: TranslateService) {
         this.logger = logger.getInstance('AddonPushNotificationsProvider');
         this.appDB = appProvider.getDB();
         this.appDB.createTablesFromSchema(this.tablesSchema);
@@ -132,7 +134,7 @@ export class AddonPushNotificationsProvider {
      * @param {any} notification Notification.
      */
     notificationClicked(notification: any): void {
-        this.platform.ready().then(() => {
+        this.initDelegate.ready().then(() => {
             this.pushNotificationsDelegate.clicked(notification);
         });
     }
@@ -154,6 +156,11 @@ export class AddonPushNotificationsProvider {
                     const localNotif = {
                             id: 1,
                             at: new Date(),
+                            channelParams: {
+                                channelID: 'notifications',
+                                channelName: this.translate.instant('addon.notifications.notifications'),
+                                importance: 4 // IMPORTANCE_HIGH
+                            },
                             data: {
                                 notif: data.notif,
                                 site: data.site
@@ -182,7 +189,7 @@ export class AddonPushNotificationsProvider {
                 }
 
                 // Trigger a notification received event.
-                this.platform.ready().then(() => {
+                this.initDelegate.ready().then(() => {
                     data.title = notification.title;
                     data.message = notification.message;
                     this.pushNotificationsDelegate.received(data);
@@ -337,9 +344,11 @@ export class AddonPushNotificationsProvider {
                     // Execute the callback in the Angular zone, so change detection doesn't stop working.
                     this.zone.run(() => {
                         this.pushID = data.registrationId;
-                        this.registerDeviceOnMoodle().catch((error) => {
-                            this.logger.warn('Can\'t register device', error);
-                        });
+                        if (this.sitesProvider.isLoggedIn()) {
+                            this.registerDeviceOnMoodle().catch((error) => {
+                                this.logger.warn('Can\'t register device', error);
+                            });
+                        }
                     });
                 });
 

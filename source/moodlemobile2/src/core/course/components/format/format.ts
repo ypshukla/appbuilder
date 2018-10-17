@@ -41,6 +41,8 @@ import { CoreDynamicComponent } from '@components/dynamic-component/dynamic-comp
     templateUrl: 'core-course-format.html'
 })
 export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
+    static LOAD_MORE_ACTIVITIES = 20; // How many activities should load each time showMoreActivities is called.
+
     @Input() course: any; // The course to render.
     @Input() sections: any[]; // List of course sections.
     @Input() downloadEnabled?: boolean; // Whether the download of sections and modules is enabled.
@@ -57,6 +59,8 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
     sectionSelectorComponent: any;
     singleSectionComponent: any;
     allSectionsComponent: any;
+    canLoadMore = false;
+    showSectionId = 0;
 
     // Data to pass to the components.
     data: any = {};
@@ -66,6 +70,7 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
     previousSection: any;
     nextSection: any;
     allSectionsId: number = CoreCourseProvider.ALL_SECTIONS_ID;
+    stealthModulesSectionId: number = CoreCourseProvider.STEALTH_MODULES_SECTION_ID;
     selectOptions: any = {};
     loaded: boolean;
 
@@ -147,13 +152,20 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
                         const section = this.sections[i];
                         if ((section.id && section.id == this.initialSectionId) ||
                                 (section.section && section.section == this.initialSectionNumber)) {
-                            this.loaded = true;
-                            this.sectionChanged(section);
+
+                            // Don't load the section if it cannot be viewed by the user.
+                            if (this.canViewSection(section)) {
+                                this.loaded = true;
+                                this.sectionChanged(section);
+                            }
                             break;
                         }
                     }
-                } else {
-                    // No section specified, get current section.
+
+                }
+
+                if (!this.loaded) {
+                    // No section specified, not found or not visible, get current section.
                     this.cfDelegate.getCurrentSection(this.course, this.sections).then((section) => {
                         this.loaded = true;
                         this.sectionChanged(section);
@@ -172,9 +184,12 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
 
                 if (!newSection) {
                     // Section not found, calculate which one to use.
-                    newSection = this.cfDelegate.getCurrentSection(this.course, this.sections);
+                    this.cfDelegate.getCurrentSection(this.course, this.sections).then((section) => {
+                        this.sectionChanged(section);
+                    });
+                } else {
+                    this.sectionChanged(newSection);
                 }
-                this.sectionChanged(newSection);
             }
         }
 
@@ -250,25 +265,33 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
         this.selectedSection = newSection;
         this.data.section = this.selectedSection;
 
-        // Select next and previous sections to show the arrows.
-        const i = this.sections.findIndex((value, index) => {
-            return this.compareSections(value, this.selectedSection);
-        });
+        if (newSection.id != this.allSectionsId) {
+            // Select next and previous sections to show the arrows.
+            const i = this.sections.findIndex((value, index) => {
+                return this.compareSections(value, this.selectedSection);
+            });
 
-        let j;
-        for (j = i - 1; j >= 1; j--) {
-            if (!(this.sections[j].visible === 0 || this.sections[j].uservisible === false) && this.sections[j].hasContent) {
-                break;
+            let j;
+            for (j = i - 1; j >= 1; j--) {
+                if (this.canViewSection(this.sections[j])) {
+                    break;
+                }
             }
-        }
-        this.previousSection = j >= 1 ? this.sections[j] : null;
+            this.previousSection = j >= 1 ? this.sections[j] : null;
 
-        for (j = i + 1; j < this.sections.length; j++) {
-            if (!(this.sections[j].visible === 0 || this.sections[j].uservisible === false) && this.sections[j].hasContent) {
-                break;
+            for (j = i + 1; j < this.sections.length; j++) {
+                if (this.canViewSection(this.sections[j])) {
+                    break;
+                }
             }
+            this.nextSection = j < this.sections.length ? this.sections[j] : null;
+        } else {
+            this.previousSection = null;
+            this.nextSection = null;
+            this.canLoadMore = false;
+            this.showSectionId = 0;
+            this.showMoreActivities();
         }
-        this.nextSection = j < this.sections.length ? this.sections[j] : null;
 
         if (this.moduleId && typeof previousValue == 'undefined') {
             setTimeout(() => {
@@ -359,6 +382,47 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     /**
+     * Show more activities (only used when showing all the sections at the same time).
+     *
+     * @param {any} [infiniteComplete] Infinite scroll complete function. Only used from core-infinite-loading.
+     */
+    showMoreActivities(infiniteComplete?: any): void {
+        this.canLoadMore = false;
+
+        let modulesLoaded = 0,
+            i;
+        for (i = this.showSectionId + 1; i < this.sections.length; i++) {
+            if (this.sections[i].hasContent && this.sections[i].modules) {
+                modulesLoaded += this.sections[i].modules.reduce((total, module) => {
+                    return module.visibleoncoursepage !== 0 ? total + 1 : total;
+                }, 0);
+
+                if (modulesLoaded >= CoreCourseFormatComponent.LOAD_MORE_ACTIVITIES) {
+                    break;
+                }
+            }
+        }
+
+        this.showSectionId = i;
+
+        this.canLoadMore = i < this.sections.length;
+
+        if (this.canLoadMore) {
+            // Check if any of the following sections have any content.
+            let thereAreMore = false;
+            for (i++; i < this.sections.length; i++) {
+                if (this.sections[i].hasContent && this.sections[i].modules && this.sections[i].modules.length > 0) {
+                    thereAreMore = true;
+                    break;
+                }
+            }
+            this.canLoadMore = thereAreMore;
+        }
+
+        infiniteComplete && infiniteComplete();
+    }
+
+    /**
      * Component destroyed.
      */
     ngOnDestroy(): void {
@@ -383,5 +447,16 @@ export class CoreCourseFormatComponent implements OnInit, OnChanges, OnDestroy {
         this.dynamicComponents.forEach((component) => {
             component.callComponentFunction('ionViewDidLeave');
         });
+    }
+
+    /**
+     * Check whether a section can be viewed.
+     *
+     * @param {any} section The section to check.
+     * @return {boolean} Whether the section can be viewed.
+     */
+    canViewSection(section: any): boolean {
+        return section.uservisible !== false && !section.hiddenbynumsections &&
+                section.id != CoreCourseProvider.STEALTH_MODULES_SECTION_ID;
     }
 }

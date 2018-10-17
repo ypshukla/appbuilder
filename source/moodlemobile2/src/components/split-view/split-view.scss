@@ -1,12 +1,9 @@
-core-split-view {
+ion-app.app-root core-split-view {
     ion-menu.split-pane-side {
         display: block;
 
         .menu-inner {
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
+            @include position(0, 0, 0, 0);
             -webkit-transform: initial;
             transform: initial;
             width: 100%;
@@ -24,15 +21,15 @@ core-split-view {
 
         .split-pane-side .core-split-item-selected {
             background-color: $gray-lighter;
-            border-left: 5px solid $core-splitview-selected;
+            @include border-start(5px, solid, $core-splitview-selected);
             &.item-md {
-                padding-left: $item-md-padding-start - 5px;
+                @include padding(null, null, null, $item-md-padding-start - 5px);
             }
             &.item-ios {
-                padding-left: $item-ios-padding-start - 5px;
+                @include padding(null, null, null, $item-ios-padding-start - 5px);
             }
             &.item-wp {
-                padding-left: $item-wp-padding-start - 5px;
+                @include padding(null, null, null, $item-wp-padding-start - 5px);
             }
         }
     }
@@ -40,15 +37,6 @@ core-split-view {
         display: none;
     }
     ion-content.statusbar-padding:first-child .scroll-content {
-        padding-top: 0 !important;
+        padding-top: 0  !important;
     }
-}
-
-.ios .split-pane {
-    .core-avoid-header ion-content.statusbar-padding,
-    .core-avoid-header .menu-inner > ion-content {
-         top: $navbar-ios-height;
-         height: calc(100% - #{($navbar-ios-height)});
-    }
-
 }

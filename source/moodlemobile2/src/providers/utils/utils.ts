@@ -26,6 +26,7 @@ import { CoreLoggerProvider } from '../logger';
 import { TranslateService } from '@ngx-translate/core';
 import { CoreLangProvider } from '../lang';
 import { CoreWSProvider, CoreWSError } from '../ws';
+import { CoreConstants } from '@core/constants';
 
 /**
  * Deferred promise. It's similar to the result of $q.defer() in AngularJS.
@@ -59,6 +60,7 @@ export interface PromiseDefer {
 export class CoreUtilsProvider {
     protected logger;
     protected iabInstance: InAppBrowserObject;
+    protected uniqueIds: {[name: string]: number} = {};
 
     constructor(private iab: InAppBrowser, private appProvider: CoreAppProvider, private clipboard: Clipboard,
             private domUtils: CoreDomUtilsProvider, logger: CoreLoggerProvider, private translate: TranslateService,
@@ -179,6 +181,43 @@ export class CoreUtilsProvider {
      */
     blockLeaveView(): void {
         return;
+    }
+
+    /**
+     * Check if a URL has a redirect.
+     *
+     * @param {string} url The URL to check.
+     * @return {Promise<boolean>} Promise resolved with boolean_ whether there is a redirect.
+     */
+    checkRedirect(url: string): Promise<boolean> {
+        if (window.fetch) {
+            const win = <any> window, // Convert to <any> to be able to use AbortController (not supported by our TS version).
+                initOptions: any = {
+                    redirect: 'follow'
+                };
+            let controller;
+
+            // Some browsers implement fetch but no AbortController.
+            if (win.AbortController) {
+                controller = new win.AbortController();
+                initOptions.signal = controller.signal;
+            }
+
+            return this.timeoutPromise(window.fetch(url, initOptions), CoreConstants.WS_TIMEOUT).then((response: Response) => {
+                return response.redirected;
+            }).catch((error) => {
+                if (error.timeout && controller) {
+                    // Timeout, abort the request.
+                    controller.abort();
+                }
+
+                // There was a timeout, cannot determine if there's a redirect. Assume it's false.
+                return false;
+            });
+        } else {
+            // Cannot check if there is a redirect, assume it's false.
+            return Promise.resolve(false);
+        }
     }
 
     /**
@@ -569,6 +608,20 @@ export class CoreUtilsProvider {
         return this.wsProvider.getRemoteFileMimeType(url).then((mimetype) => {
             return mimetype || '';
         });
+    }
+
+    /**
+     * Get a unique ID for a certain name.
+     *
+     * @param {string} name The name to get the ID for.
+     * @return {number} Unique ID.
+     */
+    getUniqueId(name: string): number {
+        if (!this.uniqueIds[name]) {
+            this.uniqueIds[name] = 0;
+        }
+
+        return ++this.uniqueIds[name];
     }
 
     /**
@@ -1065,6 +1118,26 @@ export class CoreUtilsProvider {
         });
 
         return result;
+    }
+
+    /**
+     * Set a timeout to a Promise. If the time passes before the Promise is resolved or rejected, it will be automatically
+     * rejected.
+     *
+     * @param {Promise<T>} promise The promise to timeout.
+     * @param {number} time Number of milliseconds of the timeout.
+     * @return {Promise<T>} Promise with the timeout.
+     */
+    timeoutPromise<T>(promise: Promise<T>, time: number): Promise<T> {
+        return new Promise((resolve, reject): void => {
+            const timeout = setTimeout(() => {
+                reject({timeout: true});
+            }, time);
+
+            promise.then(resolve).catch(reject).finally(() => {
+                clearTimeout(timeout);
+            });
+        });
     }
 
     /**

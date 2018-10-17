@@ -66,7 +66,7 @@ export class AddonModResourceModuleHandler implements CoreCourseModuleHandler {
         };
 
         const handlerData: CoreCourseModuleHandlerData = {
-            icon: this.courseProvider.getModuleIconSrc('resource'),
+            icon: this.courseProvider.getModuleIconSrc(this.modName),
             title: module.name,
             class: 'addon-mod_resource-handler',
             showDownloadButton: true,
@@ -88,14 +88,10 @@ export class AddonModResourceModuleHandler implements CoreCourseModuleHandler {
             } ]
         };
 
-        this.getResourceData(module, courseId).then((data) => {
+        this.getResourceData(module, courseId, handlerData).then((data) => {
             handlerData.icon = data.icon;
             handlerData.extraBadge = data.extra;
             handlerData.extraBadgeColor = 'light';
-        });
-
-        this.hideOpenButton(module, courseId).then((hideOpenButton) => {
-            handlerData.buttons[0].hidden = hideOpenButton;
         });
 
         return handlerData;
@@ -109,7 +105,8 @@ export class AddonModResourceModuleHandler implements CoreCourseModuleHandler {
      * @return {Promise<boolean>} Resolved when done.
      */
     protected hideOpenButton(module: any, courseId: number): Promise<boolean> {
-        return this.courseProvider.loadModuleContents(module, courseId).then(() => {
+        return this.courseProvider.loadModuleContents(module, courseId, undefined, false, false, undefined, this.modName)
+                .then(() => {
             return this.prefetchDelegate.getModuleStatus(module, courseId).then((status) => {
                 return status !== CoreConstants.DOWNLOADED || this.resourceHelper.isDisplayedInIframe(module);
             });
@@ -123,55 +120,65 @@ export class AddonModResourceModuleHandler implements CoreCourseModuleHandler {
      * @param {number} courseId   The course ID.
      * @return {Promise<any>}     Resource data.
      */
-    protected getResourceData(module: any, courseId: number): Promise<any> {
-        return this.resourceProvider.getResourceData(courseId, module.id).then((info) => {
-            let promise;
+    protected getResourceData(module: any, courseId: number, handlerData: CoreCourseModuleHandlerData): Promise<any> {
+        const promises = [];
+        let resourceInfo;
 
-            if (info.contentfiles && info.contentfiles.length == 1) {
-                promise = Promise.resolve(info.contentfiles);
-            } else {
-                promise = this.courseProvider.loadModuleContents(module, courseId).then(() => {
-                    if (module.contents.length) {
-                        return module.contents;
-                    }
-                });
-            }
+        // Check if the button needs to be shown or not. This also loads the module contents.
+        promises.push(this.hideOpenButton(module, courseId).then((hideOpenButton) => {
+            handlerData.buttons[0].hidden = hideOpenButton;
+        }));
 
-            return promise.then((files) => {
-                const resourceData = {
-                        icon: '',
-                        extra: ''
-                    },
-                    options = this.textUtils.unserialize(info.displayoptions),
-                    extra = [];
+        if (this.resourceProvider.isGetResourceWSAvailable()) {
+            // Get the resource data.
+            promises.push(this.resourceProvider.getResourceData(courseId, module.id).then((info) => {
+                resourceInfo = info;
+            }));
+        }
 
-                if (files && files.length) {
-                    const file = files[0];
-                    resourceData.icon = this.mimetypeUtils.getFileIcon(file.filename);
+        return Promise.all(promises).then(() => {
+            const files = module.contents && module.contents.length ? module.contents : resourceInfo && resourceInfo.contentfiles,
+                resourceData = {
+                    icon: '',
+                    extra: ''
+                },
+                options = (resourceInfo && this.textUtils.unserialize(resourceInfo.displayoptions)) || {},
+                extra = [];
 
-                    if (options.showsize) {
-                        const size = files.reduce((result, file) => {
-                            return result + file.filesize;
-                        }, 0);
-                        extra.push(this.textUtils.bytesToSize(size, 1));
-                    }
-                    if (options.showtype) {
-                        extra.push(this.mimetypeUtils.getMimetypeDescription(file));
-                    }
+            if (files && files.length) {
+                const file = files[0];
+                resourceData.icon = this.mimetypeUtils.getFileIcon(file.filename);
+
+                if (options.showsize) {
+                    const size = files.reduce((result, file) => {
+                        return result + file.filesize;
+                    }, 0);
+                    extra.push(this.textUtils.bytesToSize(size, 1));
                 }
-
-                if (resourceData.icon == '') {
-                    resourceData.icon = this.courseProvider.getModuleIconSrc('resource');
+                if (options.showtype) {
+                    extra.push(this.mimetypeUtils.getMimetypeDescription(file));
                 }
 
                 if (options.showdate) {
-                    extra.push(this.translate.instant('addon.mod_resource.uploadeddate',
-                        {$a: moment(info.timemodified * 1000).format('LLL')}));
+                    /* Modified date may be up to several minutes later than uploaded date just because
+                       teacher did not submit the form promptly. Give teacher up to 5 minutes to do it. */
+                    if (file.timemodified > file.timecreated + CoreConstants.SECONDS_MINUTE * 5) {
+                        extra.push(this.translate.instant('addon.mod_resource.modifieddate',
+                            {$a: moment(file.timemodified * 1000).format('LLL')}));
+                    } else {
+                        extra.push(this.translate.instant('addon.mod_resource.uploadeddate',
+                            {$a: moment(file.timecreated * 1000).format('LLL')}));
+                    }
                 }
-                resourceData.extra += extra.join(' ');
+            }
 
-                return resourceData;
-            });
+            if (resourceData.icon == '') {
+                resourceData.icon = this.courseProvider.getModuleIconSrc(this.modName);
+            }
+
+            resourceData.extra += extra.join(' ');
+
+            return resourceData;
         });
     }
 

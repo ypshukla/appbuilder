@@ -232,7 +232,8 @@ export class AddonMessagesDiscussionPage implements OnDestroy {
             }
 
             // Check if we are at the bottom to scroll it after render.
-            this.scrollBottom = this.content.scrollHeight - this.content.scrollTop === this.content.contentHeight;
+            this.scrollBottom = this.domUtils.getScrollHeight(this.content) - this.domUtils.getScrollTop(this.content) ===
+                this.domUtils.getContentHeight(this.content);
 
             if (this.messagesBeingSent > 0) {
                 // Ignore polling due to a race condition.
@@ -542,10 +543,10 @@ export class AddonMessagesDiscussionPage implements OnDestroy {
     /**
      * Function to load previous messages.
      *
-     * @param {any} [infiniteScroll] Infinite scroll object.
+     * @param {any} [infiniteComplete] Infinite scroll complete function. Only used from core-infinite-loading.
      * @return {Promise<any>} Resolved when done.
      */
-    loadPrevious(infiniteScroll: any): Promise<any> {
+    loadPrevious(infiniteComplete?: any): Promise<any> {
         // If there is an ongoing fetch, wait for it to finish.
         return this.waitForFetch().finally(() => {
             this.pagesLoaded++;
@@ -554,7 +555,7 @@ export class AddonMessagesDiscussionPage implements OnDestroy {
                 this.pagesLoaded--;
                 this.domUtils.showErrorModalDefault(error, 'addon.messages.errorwhileretrievingmessages', true);
             }).finally(() => {
-                infiniteScroll.complete();
+                infiniteComplete && infiniteComplete();
             });
         });
     }
@@ -569,15 +570,15 @@ export class AddonMessagesDiscussionPage implements OnDestroy {
         // Wait for new content height to be calculated.
         setTimeout(() => {
             // Visible content size changed, maintain the bottom position.
-            if (!this.viewDestroyed && this.content && this.content.contentHeight != this.oldContentHeight) {
+            if (!this.viewDestroyed && this.content && this.domUtils.getContentHeight(this.content) != this.oldContentHeight) {
                 if (!top) {
                     top = this.content.getContentDimensions().scrollTop;
                 }
 
-                top += this.oldContentHeight - this.content.contentHeight;
-                this.oldContentHeight = this.content.contentHeight;
+                top += this.oldContentHeight - this.domUtils.getContentHeight(this.content);
+                this.oldContentHeight = this.domUtils.getContentHeight(this.content);
 
-                this.content.scrollTo(0, top, 0);
+                this.domUtils.scrollTo(this.content, 0, top, 0);
             }
         });
     }
@@ -591,7 +592,7 @@ export class AddonMessagesDiscussionPage implements OnDestroy {
              // Need a timeout to leave time to the view to be rendered.
             setTimeout(() => {
                 if (!this.viewDestroyed) {
-                    this.content.scrollToBottom(0);
+                    this.domUtils.scrollToBottom(this.content, 0);
                 }
             });
             this.scrollBottom = false;

@@ -125,17 +125,19 @@ export class CoreLocalNotificationsProvider {
         this.appDB = appProvider.getDB();
         this.appDB.createTablesFromSchema(this.tablesSchema);
 
-        localNotifications.on('trigger', (notification, state) => {
-            this.trigger(notification);
-        });
+        platform.ready().then(() => {
+            localNotifications.on('trigger', (notification, state) => {
+                this.trigger(notification);
+            });
 
-        localNotifications.on('click', (notification, state) => {
-            if (notification && notification.data) {
-                this.logger.debug('Notification clicked: ', notification.data);
+            localNotifications.on('click', (notification, state) => {
+                if (notification && notification.data) {
+                    this.logger.debug('Notification clicked: ', notification.data);
 
-                const data = textUtils.parseJSON(notification.data);
-                this.notifyClick(data);
-            }
+                    const data = textUtils.parseJSON(notification.data);
+                    this.notifyClick(data);
+                }
+            });
         });
 
         eventsProvider.on(CoreEventsProvider.SITE_DELETED, (site) => {
@@ -495,6 +497,8 @@ export class CoreLocalNotificationsProvider {
 
     /**
      * Show an in app notification popover.
+     * This function was used because local notifications weren't displayed when the app was in foreground in iOS10+,
+     * but the issue was fixed in the plugin and this function is no longer used.
      *
      * @param {CoreILocalNotification} notification Notification.
      */
@@ -592,11 +596,6 @@ export class CoreLocalNotificationsProvider {
      * @return {Promise<any>} Promise resolved when stored, rejected otherwise.
      */
     trigger(notification: CoreILocalNotification): Promise<any> {
-        if (this.platform.is('ios') && this.platform.version().num >= 10) {
-            // In iOS10 show in app notification.
-            this.showNotificationPopover(notification);
-        }
-
         const entry = {
             id: notification.id,
             at: parseInt(notification.at, 10)

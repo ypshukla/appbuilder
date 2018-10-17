@@ -350,6 +350,35 @@ export class CoreCoursesProvider {
     }
 
     /**
+     * This function is meant to decrease WS calls.
+     * When requesting a single course that belongs to enrolled courses, request all enrolled courses because
+     * the WS call is probably cached.
+     *
+     * @param {string} [field] The field to search.
+     * @param {any} [value] The value to match.
+     * @param {string} [siteId] Site ID. If not defined, use current site.
+     * @return {Promise<{field: string, value: any}>} Promise resolved with the field and value to use.
+     */
+    protected fixCoursesByFieldParams(field?: string, value?: any, siteId?: string): Promise<{field: string, value: any}> {
+
+        if (field == 'id' || field == 'ids') {
+            const courseIds: any[] = String(value).split(',');
+
+            // Use the same optimization as in get admin and nav options. This will return the course IDs to use.
+            return this.getCourseIdsForAdminAndNavOptions(courseIds, siteId).then((courseIds) => {
+                if (courseIds.length > 1) {
+                    return {field: 'ids', value: courseIds.join(',')};
+                } else {
+                    return {field: 'id', value: Number(courseIds[0])};
+                }
+            });
+        } else {
+            // Nothing to do.
+            return Promise.resolve({field: field, value: value});
+        }
+    }
+
+    /**
      * Get courses. They can be filtered by field.
      *
      * @param {string} [field] The field to search. Can be left empty for all courses or:
@@ -361,9 +390,21 @@ export class CoreCoursesProvider {
      * @param {any} [value] The value to match.
      * @param {string} [siteId] Site ID. If not defined, use current site.
      * @return {Promise<any[]>} Promise resolved with the courses.
+     * @since 3.2
      */
     getCoursesByField(field?: string, value?: any, siteId?: string): Promise<any[]> {
-        return this.sitesProvider.getSite(siteId).then((site) => {
+        siteId = siteId || this.sitesProvider.getCurrentSiteId();
+
+        const originalValue = value;
+        let hasChanged = false;
+
+        return this.fixCoursesByFieldParams(field, value, siteId).then((result) => {
+            hasChanged = result.field != field || result.value != value;
+            field = result.field;
+            value = result.value;
+
+            return this.sitesProvider.getSite(siteId);
+        }).then((site) => {
             const data = {
                     field: field || '',
                     value: field ? value : ''
@@ -374,6 +415,24 @@ export class CoreCoursesProvider {
 
             return site.read('core_course_get_courses_by_field', data, preSets).then((courses) => {
                 if (courses.courses) {
+                    if (field == 'ids' && hasChanged) {
+                        // The list of courses requestes was changed to optimize it.
+                        // Return only the ones that were being requested.
+                        const courseIds = String(originalValue).split(','),
+                            finalCourses = [];
+
+                        courses.courses.forEach((course) => {
+                            const position = courseIds.indexOf(String(course.id));
+                            if (position != -1) {
+                                // Course is in the original list, take it.
+                                finalCourses.push(course);
+                                courseIds.splice(position, 1);
+                            }
+                        });
+
+                        courses.courses = finalCourses;
+                    }
+
                     // Courses will be sorted using sortorder if avalaible.
                     return courses.courses.sort((a, b) => {
                         if (typeof a.sortorder == 'undefined' && typeof b.sortorder == 'undefined') {
@@ -415,6 +474,7 @@ export class CoreCoursesProvider {
      * Check if get courses by field WS is available.
      *
      * @return {boolean} Whether get courses by field is available.
+     * @since 3.2
      */
     isGetCoursesByFieldAvailable(): boolean {
         return this.sitesProvider.wsAvailableInCurrentSite('core_course_get_courses_by_field');
@@ -717,7 +777,14 @@ export class CoreCoursesProvider {
      * @return {Promise<any>} Promise resolved when the data is invalidated.
      */
     invalidateCoursesByField(field?: string, value?: any, siteId?: string): Promise<any> {
-        return this.sitesProvider.getSite(siteId).then((site) => {
+        siteId = siteId || this.sitesProvider.getCurrentSiteId();
+
+        return this.fixCoursesByFieldParams(field, value, siteId).then((result) => {
+            field = result.field;
+            value = result.value;
+
+            return this.sitesProvider.getSite(siteId);
+        }).then((site) => {
             return site.invalidateWsCacheForKey(this.getCoursesByFieldCacheKey(field, value));
         });
     }

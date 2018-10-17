@@ -148,7 +148,7 @@ export class AddonModQuizIndexComponent extends CoreCourseModuleMainActivityComp
      * Get the quiz data.
      *
      * @param {boolean} [refresh=false] If it's refreshing content.
-     * @param {boolean} [sync=false] If the refresh is needs syncing.
+     * @param {boolean} [sync=false] If it should try to sync.
      * @param {boolean} [showErrors=false] If show errors to the user of hide them.
      * @return {Promise<any>} Promise resolved when done.
      */
@@ -426,7 +426,7 @@ export class AddonModQuizIndexComponent extends CoreCourseModuleMainActivityComp
             this.loaded = false;
             this.refreshIcon = 'spinner';
             this.syncIcon = 'spinner';
-            this.content.scrollToTop();
+            this.domUtils.scrollToTop(this.content);
 
             promise.then(() => {
                 this.refreshContent().finally(() => {
@@ -488,7 +488,7 @@ export class AddonModQuizIndexComponent extends CoreCourseModuleMainActivityComp
         }
 
         if (this.quizData && syncEventData.quizId == this.quizData.id) {
-            this.content.scrollToTop();
+            this.domUtils.scrollToTop(this.content);
 
             return true;
         }

@@ -1,4 +1,4 @@
-addon-mod-quiz-index {
+ion-app.app-root addon-mod-quiz-index {
 
     .addon-mod_quiz-table {
         .addon-mod_quiz-table-header .item-inner {
@@ -7,11 +7,11 @@ addon-mod-quiz-index {
         }
 
         .item-inner ion-label {
-            margin-right: 0;
+            @include margin(null, 0, null, null);
         }
 
         .item {
-            padding-left: 0;
+            @include padding(null, null, null, 0);
         }
 
         .label {

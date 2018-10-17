@@ -180,6 +180,18 @@ export class AddonCalendarListPage implements OnDestroy {
     }
 
     /**
+     * Function to load more events.
+     *
+     * @param {any} [infiniteComplete] Infinite scroll complete function. Only used from core-infinite-loading.
+     * @return {Promise<any>} Resolved when done.
+     */
+    loadMoreEvents(infiniteComplete?: any): Promise<any> {
+        return this.fetchEvents().finally(() => {
+            infiniteComplete && infiniteComplete();
+        });
+    }
+
+    /**
      * Get filtered events.
      *
      * @return {any[]} Filtered events.
@@ -306,7 +318,8 @@ export class AddonCalendarListPage implements OnDestroy {
         popover.onDidDismiss((course) => {
             if (course) {
                 this.filter.course = course;
-                this.content.scrollToTop();
+                this.domUtils.scrollToTop(this.content);
+
                 this.filteredEvents = this.getFilteredEvents();
             }
         });

@@ -17,8 +17,8 @@ export class CoreConfigConstants {
     static app_id = 'com.vidyamantra.cmoodleapp55';
     static appname = 'VidyaMantra';
     static desktopappname = 'VidyaMantra Desktop';
-    static versioncode = 3500;
-    static versionname = '3.5.0';
+    static versioncode = 3520;
+    static versionname = '3.5.2';
     static cache_expiration_time = 300000;
     static default_lang = 'en';
     static languages: any = {
@@ -31,6 +31,7 @@ export class CoreConfigConstants {
         'de-du': 'Deutsch - Du',
         'el': 'Ελληνικά',
         'en': 'English',
+        'en-us': 'English - United States',
         'es': 'Español',
         'es-mx': 'Español - México',
         'eu': 'Euskara',
@@ -38,21 +39,26 @@ export class CoreConfigConstants {
         'fi': 'Suomi',
         'fr': 'Français',
         'he': 'עברית',
+        'hr': 'Hrvatski',
         'hu': 'magyar',
+        'id': 'Indonesian',
         'it': 'Italiano',
         'ja': '日本語',
+        'kn': 'ಕನ್ನಡ',
         'ko': '한국어',
         'lt': 'Lietuvių',
         'mr': 'मराठी',
         'nl': 'Nederlands',
+        'no': 'Norsk - bokmål',
         'pl': 'Polski',
-        'pt-br': 'Português - Brasil',
         'pt': 'Português - Portugal',
+        'pt-br': 'Português - Brasil',
         'ro': 'Română',
         'ru': 'Русский',
         'sr-cr': 'Српски',
         'sr-lt': 'Srpski',
         'sv': 'Svenska',
+        'tg': 'Тоҷикӣ',
         'tr': 'Türkçe',
         'uk': 'Українська',
         'zh-cn': '简体中文',
@@ -64,9 +70,10 @@ export class CoreConfigConstants {
     static gcmpn = '578987199728';
     static customurlscheme = 'cmoodlemobile';
     static siteurl = 'https://lms.vidyamantra.com';
-    static multisitesdisplay = 'select';
+    static multisitesdisplay = '';
     static skipssoconfirmation = false;
     static forcedefaultlanguage = false;
     static privacypolicy = 'https://www.keytoschool.com/privacy-policy/';
-    static compilationtime = 1535435767094;
+    static compilationtime = 1539765382582;
+    static lastcommit = 'b12faa5033bf11f6817590fa884a3e2257923a67';
 }

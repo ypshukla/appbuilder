@@ -142,7 +142,7 @@ export class AddonModDataIndexComponent extends CoreCourseModuleMainActivityComp
         if (this.data && syncEventData.dataId == this.data.id && typeof syncEventData.entryId == 'undefined') {
             this.loaded = false;
             // Refresh the data.
-            this.content.scrollToTop();
+            this.domUtils.scrollToTop(this.content);
 
             return true;
         }
@@ -154,7 +154,7 @@ export class AddonModDataIndexComponent extends CoreCourseModuleMainActivityComp
      * Download data contents.
      *
      * @param  {boolean}      [refresh=false]    If it's refreshing content.
-     * @param  {boolean}      [sync=false]       If the refresh is needs syncing.
+     * @param  {boolean}      [sync=false]       If it should try to sync.
      * @param  {boolean}      [showErrors=false] If show errors to the user of hide them.
      * @return {Promise<any>} Promise resolved when done.
      */

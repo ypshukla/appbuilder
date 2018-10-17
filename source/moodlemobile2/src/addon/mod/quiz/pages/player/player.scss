@@ -1,4 +1,4 @@
-page-addon-mod-quiz-player {
+ion-app.app-root page-addon-mod-quiz-player {
     .toolbar {
         padding-top: 0;
         padding-bottom: 0;
@@ -6,5 +6,9 @@ page-addon-mod-quiz-player {
 
     .core-has-fixed-timer form {
         padding-top: 56px;
+    }
+
+    .toolbar-ios .bar-buttons-ios .bar-button {
+        @include padding-horizontal($content-padding);
     }
 }

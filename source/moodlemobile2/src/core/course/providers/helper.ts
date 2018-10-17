@@ -131,9 +131,10 @@ export class CoreCourseHelperProvider {
      * @param {any[]} sections List of sections to treat modules.
      * @param {number} courseId Course ID of the modules.
      * @param {any[]} [completionStatus] List of completion status.
+     * @param {string} [courseName] Course name. Recommended if completionStatus is supplied.
      * @return {boolean} Whether the sections have content.
      */
-    addHandlerDataForModules(sections: any[], courseId: number, completionStatus?: any): boolean {
+    addHandlerDataForModules(sections: any[], courseId: number, completionStatus?: any, courseName?: string): boolean {
         let hasContent = false;
 
         sections.forEach((section) => {
@@ -150,7 +151,11 @@ export class CoreCourseHelperProvider {
                     // Check if activity has completions and if it's marked.
                     module.completionstatus = completionStatus[module.id];
                     module.completionstatus.courseId = courseId;
+                    module.completionstatus.courseName = courseName;
                 }
+
+                // Check if the module is stealth.
+                module.isStealth = module.visibleoncoursepage === 0 || (module.visible && !section.visible);
             });
         });
 
@@ -536,6 +541,10 @@ export class CoreCourseHelperProvider {
             return this.downloadModuleWithMainFileIfNeeded(module, courseId, component, componentId, files, siteId)
                     .then((result) => {
                 if (result.path.indexOf('http') === 0) {
+                    /* In iOS, if we use the same URL in embedded browser and background download then the download only
+                       downloads a few bytes (cached ones). Add a hash to the URL so both URLs are different. */
+                    result.path = result.path + '#moodlemobile-embedded';
+
                     return this.utils.openOnlineFile(result.path).catch((error) => {
                         // Error opening the file, some apps don't allow opening online files.
                         if (!this.fileProvider.isAvailable()) {
@@ -606,7 +615,7 @@ export class CoreCourseHelperProvider {
                 return this.filepoolProvider.getPackageStatus(siteId, component, componentId).then((status) => {
                     result.status = status;
 
-                    const isWifi = !this.appProvider.isNetworkAccessLimited(),
+                    const isWifi = this.appProvider.isWifi(),
                         isOnline = this.appProvider.isOnline();
 
                     if (status === CoreConstants.DOWNLOADED) {
@@ -635,7 +644,7 @@ export class CoreCourseHelperProvider {
                             });
                         }, () => {
                             // Start the download if in wifi, but return the URL right away so the file is opened.
-                            if (isWifi && isOnline) {
+                            if (isWifi) {
                                 this.downloadModule(module, courseId, component, componentId, files, siteId);
                             }
 
@@ -884,9 +893,11 @@ export class CoreCourseHelperProvider {
      * @param {string} [siteId] Site ID. If not defined, current site.
      * @param {number} [courseId] Course ID. If not defined we'll try to retrieve it from the site.
      * @param {number} [sectionId] Section the module belongs to. If not defined we'll try to retrieve it from the site.
+     * @param {string} [modName] If set, the app will retrieve all modules of this type with a single WS call. This reduces the
+     *                           number of WS calls, but it isn't recommended for modules that can return a lot of contents.
      * @return {Promise<void>} Promise resolved when done.
      */
-    navigateToModule(moduleId: number, siteId?: string, courseId?: number, sectionId?: number): Promise<void> {
+    navigateToModule(moduleId: number, siteId?: string, courseId?: number, sectionId?: number, modName?: string): Promise<void> {
         siteId = siteId || this.sitesProvider.getCurrentSiteId();
 
         const modal = this.domUtils.showModalLoading();
@@ -920,7 +931,7 @@ export class CoreCourseHelperProvider {
             site = s;
 
             // Get the module.
-            return this.courseProvider.getModule(moduleId, courseId, sectionId, false, false, siteId);
+            return this.courseProvider.getModule(moduleId, courseId, sectionId, false, false, siteId, modName);
         }).then((module) => {
             const params = {
                 course: { id: courseId },

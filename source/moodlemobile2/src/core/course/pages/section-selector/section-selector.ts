@@ -15,6 +15,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavParams, ViewController } from 'ionic-angular';
 import { CoreCourseHelperProvider } from '../../providers/helper';
+import { CoreCourseProvider } from '../../providers/course';
 
 /**
  * Page that displays course section selector.
@@ -26,6 +27,7 @@ import { CoreCourseHelperProvider } from '../../providers/helper';
 })
 export class CoreCourseSectionSelectorPage {
 
+    stealthModulesSectionId = CoreCourseProvider.STEALTH_MODULES_SECTION_ID;
     sections: any;
     selected: number;
 
@@ -47,7 +49,7 @@ export class CoreCourseSectionSelectorPage {
      * @param {any} section Selected section object.
      */
     selectSection(section: any): void {
-        if (!(section.visible === 0 || section.uservisible === false)) {
+        if (section.uservisible !== false) {
             this.viewCtrl.dismiss(section);
         }
     }

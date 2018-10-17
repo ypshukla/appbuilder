@@ -276,11 +276,21 @@ export class CoreLoginEmailSignupPage {
                         }
                     });
                 }).catch((error) => {
-                    this.domUtils.showErrorModalDefault(error && error.error, 'core.login.usernotaddederror', true);
+                    this.domUtils.showErrorModalDefault(error, 'core.login.usernotaddederror', true);
                 }).finally(() => {
                     modal.dismiss();
                 });
         }
+    }
+
+    /**
+     * Escape mail to avoid special characters to be treated as a RegExp.
+     *
+     * @param  {string} text Initial mail.
+     * @return {string}      Escaped mail.
+     */
+    escapeMail(text: string): string {
+        return this.textUtils.escapeForRegex(text);
     }
 
     /**

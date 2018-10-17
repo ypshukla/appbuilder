@@ -108,7 +108,7 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                             // save as xml file
                             $dom->Save($xmlpath);
                         }
-                        shell_exec("/bin/sed -i 's/moodlemobile/$urlscheme/' $appsource/config.xml");
+                        shell_exec("/bin/sed -i '121s/moodlemobile/$urlscheme/' $appsource/config.xml");
                         // shell_exec("/bin/sed -i 's/moodlemobile/$urlscheme/' $appsource/www/config.xml");
 
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='3' where id=$id");
@@ -189,29 +189,29 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
 
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='6' where id=$id");
 
-                    case 6: // Prepare git repo
+						case 6: // Prepare git repo
                         shell_exec("/usr/bin/git init $basepath/build/$id/and");
-                        shell_exec("/usr/bin/git init $basepath/build/$id/ios");
+                        //shell_exec("/usr/bin/git init $basepath/build/$id/ios");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
+                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git checkout -b and$id");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git checkout -b ios$id");
+                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git checkout -b ios$id");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git add -A");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git add -A");
+                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git add -A");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git commit -m \"and$id\"");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git commit -m \"ios$id\"");
+                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git commit -m \"ios$id\"");
 
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");
-                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id");
+                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id");
 
                         //shell_exec("/bin/rm -rf $appsource");
 
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='7' where id=$id");
-                        mysqli_query($con,"UPDATE mobile_app set iosstage='7' where id=$id");
+                        //mysqli_query($con,"UPDATE mobile_app set iosstage='7' where id=$id");
                         
                 }
             }

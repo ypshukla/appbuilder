@@ -21,6 +21,7 @@ import { CoreLoggerProvider } from './logger';
 import { CoreSitesFactoryProvider } from './sites-factory';
 import { CoreTextUtilsProvider } from './utils/text';
 import { CoreUrlUtilsProvider } from './utils/url';
+import { CoreUtilsProvider } from './utils/utils';
 import { CoreConstants } from '@core/constants';
 import { CoreConfigConstants } from '../configconstants';
 import { CoreSite } from '@classes/site';
@@ -211,7 +212,8 @@ export class CoreSitesProvider {
 
     constructor(logger: CoreLoggerProvider, private http: HttpClient, private sitesFactory: CoreSitesFactoryProvider,
             private appProvider: CoreAppProvider, private translate: TranslateService, private urlUtils: CoreUrlUtilsProvider,
-            private eventsProvider: CoreEventsProvider,  private textUtils: CoreTextUtilsProvider) {
+            private eventsProvider: CoreEventsProvider,  private textUtils: CoreTextUtilsProvider,
+            private utils: CoreUtilsProvider) {
         this.logger = logger.getInstance('CoreSitesProvider');
 
         this.appDB = appProvider.getDB();
@@ -258,14 +260,10 @@ export class CoreSitesProvider {
                 protocol = protocol == 'https://' ? 'http://' : 'https://';
 
                 return this.checkSiteWithProtocol(siteUrl, protocol).catch((secondError) => {
-                    // Site doesn't exist.
-                    if (secondError.error) {
-                        return Promise.reject(secondError.error);
-                    } else if (error.error) {
-                        return Promise.reject(error.error);
-                    }
-
-                    return Promise.reject(this.translate.instant('core.login.checksiteversion'));
+                    // Site doesn't exist. Return the error message.
+                    return Promise.reject(this.textUtils.getErrorMessageFromError(error) ||
+                            this.textUtils.getErrorMessageFromError(secondError) ||
+                            this.translate.instant('core.cannotconnect'));
                 });
             });
         }
@@ -286,7 +284,7 @@ export class CoreSitesProvider {
 
         return this.siteExists(siteUrl).catch((error) => {
             // Do not continue checking if WS are not enabled.
-            if (error.errorcode && error.errorcode == 'enablewsdescription') {
+            if (error.errorcode == 'enablewsdescription') {
                 return rejectWithCriticalError(error.error, error.errorcode);
             }
 
@@ -298,13 +296,13 @@ export class CoreSitesProvider {
                 siteUrl = treatedUrl;
             }).catch((secondError) => {
                 // Do not continue checking if WS are not enabled.
-                if (secondError.errorcode && secondError.errorcode == 'enablewsdescription') {
+                if (secondError.errorcode == 'enablewsdescription') {
                     return rejectWithCriticalError(secondError.error, secondError.errorcode);
                 }
 
-                error = secondError || error;
-
-                return Promise.reject({ error: typeof error == 'object' ? error.error : error });
+                // Return the error message.
+                return Promise.reject(this.textUtils.getErrorMessageFromError(error) ||
+                        this.textUtils.getErrorMessageFromError(secondError));
             });
         }).then(() => {
             // Create a temporary site to check if local_mobile is installed.
@@ -378,18 +376,18 @@ export class CoreSitesProvider {
     siteExists(siteUrl: string): Promise<void> {
         const data: any = {};
 
-        if (!this.appProvider.isMobile()) {
+        if (!this.appProvider.isMobile() && !this.appProvider.isDesktop()) {
             // Send fake parameters for CORS. This is only needed in browser.
             data.username = 'a';
             data.password = 'b';
             data.service = 'c';
         }
 
-        const promise = this.http.post(siteUrl + '/login/token.php', data).timeout(CoreConstants.WS_TIMEOUT).toPromise();
-
-        return promise.catch((error) => {
-            return Promise.reject(error.message);
+        return this.http.post(siteUrl + '/login/token.php', data).timeout(CoreConstants.WS_TIMEOUT).toPromise().catch(() => {
+            // Default error messages are kinda bad, return our own message.
+            return Promise.reject({error: this.translate.instant('core.cannotconnect')});
         }).then((data: any) => {
+
             if (data.errorcode && (data.errorcode == 'enablewsdescription' || data.errorcode == 'requirecorrectaccess')) {
                 return Promise.reject({ errorcode: data.errorcode, error: data.error });
             } else if (data.error && data.error == 'Web services must be enabled in Advanced features.') {
@@ -424,7 +422,8 @@ export class CoreSitesProvider {
                 password: password,
                 service: service
             },
-            promise = this.http.post(siteUrl + '/login/token.php', params).timeout(CoreConstants.WS_TIMEOUT).toPromise();
+            loginUrl = siteUrl + '/login/token.php',
+            promise = this.http.post(loginUrl, params).timeout(CoreConstants.WS_TIMEOUT).toPromise();
 
         return promise.then((data: any): any => {
             if (typeof data == 'undefined') {
@@ -433,12 +432,22 @@ export class CoreSitesProvider {
                 if (typeof data.token != 'undefined') {
                     return { token: data.token, siteUrl: siteUrl, privateToken: data.privatetoken };
                 } else {
+
                     if (typeof data.error != 'undefined') {
                         // We only allow one retry (to avoid loops).
                         if (!retry && data.errorcode == 'requirecorrectaccess') {
                             siteUrl = this.urlUtils.addOrRemoveWWW(siteUrl);
 
                             return this.getUserToken(siteUrl, username, password, service, true);
+                        } else if (data.errorcode == 'missingparam') {
+                            // It seems the server didn't receive all required params, it could be due to a redirect.
+                            return this.utils.checkRedirect(loginUrl).then((redirect) => {
+                                if (redirect) {
+                                    return Promise.reject({ error: this.translate.instant('core.login.sitehasredirect') });
+                                } else {
+                                    return Promise.reject({ error: data.error, errorcode: data.errorcode });
+                                }
+                            });
                         } else if (typeof data.errorcode != 'undefined') {
                             return Promise.reject({ error: data.error, errorcode: data.errorcode });
                         } else {
@@ -494,9 +503,23 @@ export class CoreSitesProvider {
                     return siteId;
                 });
             } else if (result == this.LEGACY_APP_VERSION) {
-                return Promise.reject(this.translate.instant('core.login.legacymoodleversion'));
+                let errorKey = 'core.login.legacymoodleversion',
+                    params;
+
+                if (this.appProvider.isDesktop()) {
+                    errorKey += 'desktop';
+                    params = {$a: siteUrl};
+                }
+
+                return Promise.reject({
+                    error: this.translate.instant(errorKey, params),
+                    errorcode: 'legacymoodleversion'
+                });
             } else {
-                return Promise.reject(this.translate.instant('core.login.invalidmoodleversion'));
+                return Promise.reject({
+                    error: this.translate.instant('core.login.invalidmoodleversion'),
+                    errorcode: 'invalidmoodleversion'
+                });
             }
         });
     }

@@ -36,6 +36,8 @@ export class AddonNotificationsListPage {
     notifications = [];
     notificationsLoaded = false;
     canLoadMore = false;
+    canMarkAllNotificationsAsRead = false;
+    loadingMarkAllNotificationsAsRead = false;
 
     protected readCount = 0;
     protected unreadCount = 0;
@@ -82,7 +84,7 @@ export class AddonNotificationsListPage {
         const limit = AddonNotificationsProvider.LIST_LIMIT;
 
         return this.notificationsProvider.getUnreadNotifications(this.unreadCount, limit).then((unread) => {
-            let promise;
+            const promises = [];
 
             unread.forEach(this.formatText.bind(this));
 
@@ -93,7 +95,7 @@ export class AddonNotificationsListPage {
             if (unread.length < limit) {
                 // Limit not reached. Get read notifications until reach the limit.
                 const readLimit = limit - unread.length;
-                promise = this.notificationsProvider.getReadNotifications(this.readCount, readLimit).then((read) => {
+                promises.push(this.notificationsProvider.getReadNotifications(this.readCount, readLimit).then((read) => {
                     read.forEach(this.formatText.bind(this));
                     this.readCount += read.length;
                     if (refresh) {
@@ -107,9 +109,8 @@ export class AddonNotificationsListPage {
                         this.domUtils.showErrorModalDefault(error, 'addon.notifications.errorgetnotifications', true);
                         this.canLoadMore = false; // Set to false to prevent infinite calls with infinite-loading.
                     }
-                });
+                }));
             } else {
-                promise = Promise.resolve();
                 if (refresh) {
                     this.notifications = unread;
                 } else {
@@ -118,7 +119,7 @@ export class AddonNotificationsListPage {
                 this.canLoadMore = true;
             }
 
-            return promise.then(() => {
+            return Promise.all(promises).then(() => {
                 // Mark retrieved notifications as read if they are not.
                 this.markNotificationsAsRead(unread);
             });
@@ -129,23 +130,60 @@ export class AddonNotificationsListPage {
     }
 
     /**
+     * Mark all notifications as read.
+     */
+    markAllNotificationsAsRead(): void {
+        this.loadingMarkAllNotificationsAsRead = true;
+        this.notificationsProvider.markAllNotificationsAsRead().catch(() => {
+            // Omit failure.
+        }).finally(() => {
+            const siteId = this.sitesProvider.getCurrentSiteId();
+            this.eventsProvider.trigger(AddonNotificationsProvider.READ_CHANGED_EVENT, null, siteId);
+
+            this.notificationsProvider.getUnreadNotificationsCount().then((unread) => {
+                this.canMarkAllNotificationsAsRead = unread > 0;
+                this.loadingMarkAllNotificationsAsRead = false;
+            });
+        });
+    }
+
+    /**
      * Mark notifications as read.
      *
      * @param {any[]} notifications Array of notification objects.
      */
     protected markNotificationsAsRead(notifications: any[]): void {
+        let promise;
+
         if (notifications.length > 0) {
             const promises = notifications.map((notification) => {
                 return this.notificationsProvider.markNotificationRead(notification.id);
             });
 
-            Promise.all(promises).finally(() => {
+            promise = Promise.all(promises).catch(() => {
+                // Ignore errors.
+            }).finally(() => {
                 this.notificationsProvider.invalidateNotificationsList().finally(() => {
                     const siteId = this.sitesProvider.getCurrentSiteId();
                     this.eventsProvider.trigger(AddonNotificationsProvider.READ_CHANGED_EVENT, null, siteId);
                 });
             });
+        } else {
+            promise = Promise.resolve();
         }
+
+        promise.finally(() => {
+            // Check if mark all notifications as read is enabled and there are some to read.
+            if (this.notificationsProvider.isMarkAllNotificationsAsReadEnabled()) {
+                this.loadingMarkAllNotificationsAsRead = true;
+
+                return this.notificationsProvider.getUnreadNotificationsCount().then((unread) => {
+                    this.canMarkAllNotificationsAsRead = unread > 0;
+                    this.loadingMarkAllNotificationsAsRead = false;
+                });
+            }
+            this.canMarkAllNotificationsAsRead = false;
+        });
     }
 
     /**
@@ -166,11 +204,11 @@ export class AddonNotificationsListPage {
     /**
      * Load more results.
      *
-     * @param {any} infiniteScroll The infinit scroll instance.
+     * @param {any} [infiniteComplete] Infinite scroll complete function. Only used from core-infinite-loading.
      */
-    loadMoreNotifications(infiniteScroll: any): void {
+    loadMoreNotifications(infiniteComplete?: any): void {
         this.fetchNotifications().finally(() => {
-            infiniteScroll.complete();
+            infiniteComplete && infiniteComplete();
         });
     }
 

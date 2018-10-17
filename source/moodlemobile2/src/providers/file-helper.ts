@@ -56,6 +56,10 @@ export class CoreFileHelperProvider {
             }
 
             if (url.indexOf('http') === 0) {
+                /* In iOS, if we use the same URL in embedded browser and background download then the download only
+                   downloads a few bytes (cached ones). Add a hash to the URL so both URLs are different. */
+                url = url + '#moodlemobile-embedded';
+
                 return this.utils.openOnlineFile(url).catch((error) => {
                     // Error opening the file, some apps don't allow opening online files.
                     if (!this.fileProvider.isAvailable()) {
@@ -128,7 +132,7 @@ export class CoreFileHelperProvider {
 
                 return promise.then((state) => {
                     // The file system is available.
-                    const isWifi = !this.appProvider.isNetworkAccessLimited(),
+                    const isWifi = this.appProvider.isWifi(),
                         isOnline = this.appProvider.isOnline();
 
                     if (state == CoreConstants.DOWNLOADED) {
@@ -156,7 +160,7 @@ export class CoreFileHelperProvider {
                             return this.downloadFile(fileUrl, component, componentId, timemodified, onProgress, file, siteId);
                         }, () => {
                             // Start the download if in wifi, but return the URL right away so the file is opened.
-                            if (isWifi && isOnline) {
+                            if (isWifi) {
                                 this.downloadFile(fileUrl, component, componentId, timemodified, onProgress, file, siteId);
                             }
 

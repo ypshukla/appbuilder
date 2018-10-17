@@ -135,7 +135,7 @@ export class AddonModFeedbackIndexComponent extends CoreCourseModuleMainActivity
     protected isRefreshSyncNeeded(syncEventData: any): boolean {
         if (this.feedback && syncEventData.feedbackId == this.feedback.id) {
             // Refresh the data.
-            this.content.scrollToTop();
+            this.domUtils.scrollToTop(this.content);
 
             return true;
         }
@@ -147,7 +147,7 @@ export class AddonModFeedbackIndexComponent extends CoreCourseModuleMainActivity
      * Download feedback contents.
      *
      * @param  {boolean}      [refresh=false]    If it's refreshing content.
-     * @param  {boolean}      [sync=false]       If the refresh is needs syncing.
+     * @param  {boolean}      [sync=false]       If it should try to sync.
      * @param  {boolean}      [showErrors=false] If show errors to the user of hide them.
      * @return {Promise<any>} Promise resolved when done.
      */
@@ -423,9 +423,10 @@ export class AddonModFeedbackIndexComponent extends CoreCourseModuleMainActivity
 
                 this.warning = '';
                 if (analysis.warnings.length) {
-                    this.warning = analysis.warnings.find((warning) => {
+                    const warning = analysis.warnings.find((warning) => {
                         return warning.warningcode == 'insufficientresponsesforthisgroup';
                     });
+                    this.warning = warning && warning.message;
                 }
             }
         });

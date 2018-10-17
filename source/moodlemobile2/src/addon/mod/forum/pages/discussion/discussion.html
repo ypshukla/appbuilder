@@ -30,7 +30,7 @@
             <ion-icon name="warning"></ion-icon> {{ 'addon.mod_forum.discussionlocked' | translate }}
         </ion-card>
 
-        <ion-card *ngIf="discussion" margin-bottom>
+        <ion-card *ngIf="discussion" margin-bottom class="highlight">
             <addon-mod-forum-post [post]="discussion" [courseId]="courseId" [discussionId]="discussionId" [component]="component" [componentId]="cmId" [replyData]="replyData" [originalData]="originalData" [defaultSubject]="defaultSubject" [forum]="forum" [trackPosts]="trackPosts" (onPostChange)="postListChanged()"></addon-mod-forum-post>
         </ion-card>
 
