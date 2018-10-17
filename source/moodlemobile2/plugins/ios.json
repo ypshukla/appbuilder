@@ -1,0 +1,95 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "com-darryncampbell-cordova-plugin-intent": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-android-support-gradle-release": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-clipboard": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-badge": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-camera": {
+      "CAMERA_USAGE_DESCRIPTION": "We need camera access to take pictures so you can attach them as part of your submissions.",
+      "PHOTOLIBRARY_USAGE_DESCRIPTION": "We need photo library access to get pictures from there so you can attach them as part of your submissions.",
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-customurlscheme": {
+      "URL_SCHEME": "moodlemobile",
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-device": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-file": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-file-opener2": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-file-transfer": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-globalization": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-inappbrowser": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-local-notifications-mm": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-media-capture": {
+      "CAMERA_USAGE_DESCRIPTION": "We need camera access to take pictures so you can attach them as part of your submissions.",
+      "MICROPHONE_USAGE_DESCRIPTION": "We need microphone access to record sounds so you can attach them as part of your submissions.",
+      "PHOTOLIBRARY_USAGE_DESCRIPTION": "We need photo library access to get pictures from there so you can attach them as part of your submissions.",
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-network-information": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-statusbar": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-zip": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-sqlite-evcore-extbuild-free": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "ionic-plugin-keyboard": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "nl.kingsquare.cordova.background-audio": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "phonegap-plugin-push": {
+      "SENDER_ID": "578987199728",
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    }
+  },
+  "dependent_plugins": {
+    "cordova-plugin-app-event": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    },
+    "cordova-plugin-compat": {
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+    }
+  }
+}
