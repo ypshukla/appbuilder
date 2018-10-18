@@ -179,12 +179,12 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='6' where id=$id");
 
 						case 6: // Prepare android git repo
-                        /*shell_exec("/usr/bin/git init $basepath/build/$id/and");
+                        shell_exec("/usr/bin/git init $basepath/build/$id/and");
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git checkout -b and$id");
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git add -A");
 						shell_exec("cd $basepath/build/$id/and ; /usr/bin/git commit -m \"and$id\"");
-						shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");*/
+						shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");
 						
 						// Prepare ios git repo
                         /*shell_exec("/usr/bin/git init $basepath/build/$id/ios");
