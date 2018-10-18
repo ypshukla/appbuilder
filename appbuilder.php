@@ -73,10 +73,11 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         $string = file_get_contents($jsonpath);
                         $string = json_decode($string, true);
                         $string['app_id'] = "com.vidyamantra.cmoodleapp$id";
-                        $string['privacypolicy'] = "$policyurl";
+                        $string['appname'] = "$appname";
+                        $string['desktopappname'] = "$appname Desktop";
                         $string['customurlscheme'] = "$urlscheme";
-                        //$string['demo_sites'] = null;
-                        $string['siteurl'] = $siteurl;
+                        $string['siteurl'] = "$siteurl";
+						$string['privacypolicy'] = "$policyurl";
                         $string = json_encode($string, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                         file_put_contents($jsonpath, $string);
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='2' where id=$id");
@@ -90,27 +91,27 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         // Load xml file
                         $xmlpaths=array("$appsource/config.xml");
                         foreach ($xmlpaths as $xmlpath) {
-                            $xml = simplexml_load_file($xmlpath);
-                            // Make changes
-                            $xml->attributes()->id = $string['app_id'];
-                            $xml->attributes()->versionCode = $string['versioncode'];
-                            $xml->attributes()->version = $string['versionname'];
-                            $xml->name = $appname;
-                            $xml->description = $description;
-                            $xml->author = 'Vidya Mantra EduSystems Pvt. Ltd.';
-                            $xml->author->attributes()->href = 'http://moodleapp.keytoschool.com';
-                            $xml->author->attributes()->email = 'sales@vidyamantra.com';
-                            // Save as dom
-                            $dom_sxe = dom_import_simplexml($xml);
-                            $dom = new DomDocument('1.0', 'UTF-8');
-                            $dom_sxe = $dom->importNode($dom_sxe, true);
-                            $dom_sxe = $dom->appendChild($dom_sxe);
-                            // save as xml file
-                            $dom->Save($xmlpath);
+                        $xml = simplexml_load_file($xmlpath);
+                        // Make changes
+                        $xml->attributes()->id = $string['app_id'];
+                        $xml->attributes()->versionCode = $string['versioncode'];
+                        $xml->attributes()->version = $string['versionname'];
+                        $xml->name = $appname;
+                        $xml->description = $description;
+                        $xml->author = 'Vidya Mantra EduSystems Pvt. Ltd.';
+                        $xml->author->attributes()->href = 'http://moodleapp.keytoschool.com';
+                        $xml->author->attributes()->email = 'sales@vidyamantra.com';
+                        // Save as dom
+                        $dom_sxe = dom_import_simplexml($xml);
+                        $dom = new DomDocument('1.0', 'UTF-8');
+                        $dom_sxe = $dom->importNode($dom_sxe, true);
+                        $dom_sxe = $dom->appendChild($dom_sxe);
+                        // save as xml file
+                        $dom->Save($xmlpath);
                         }
+                        
                         shell_exec("/bin/sed -i '121s/moodlemobile/$urlscheme/' $appsource/config.xml");
-                        // shell_exec("/bin/sed -i 's/moodlemobile/$urlscheme/' $appsource/www/config.xml");
-
+                        
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='3' where id=$id");
 
                     case 3: // Replacing images and generating images
@@ -175,38 +176,23 @@ for ($breaktime = 5 * 60, $difference = 0, $timestamp = time(); $difference < $b
                         shell_exec("/bin/mkdir -p $basepath/build/$id/ios");
                         shell_exec("/bin/cp -R $basepath/build/$id/and/* $basepath/build/$id/ios/");
 											
-                        // Make changes in index.html for android
-                        /* $path = "$basepath/build/$id/and/index.html";
-                        $string = file_get_contents($path);
-                        $string = preg_replace('/\<body ng-app="mm"\>/', '<body ng-app="mm" class="platform-android platform-cordova platform-webview">', $string);
-                        file_put_contents($path, $string);
-
-                        // Make changes in index.html for ios
-                        $path = "$basepath/build/$id/ios/index.html";
-                        $string = file_get_contents($path);
-                        $string = preg_replace('/\<body ng-app="mm"\>/', '<body ng-app="mm" class="platform-ios platform-cordova platform-webview">', $string);
-                        file_put_contents($path, $string); */
-
                         mysqli_query($con,"UPDATE mobile_app set anroidstage='6' where id=$id");
 
-						case 6: // Prepare git repo
-                        shell_exec("/usr/bin/git init $basepath/build/$id/and");
-                        //shell_exec("/usr/bin/git init $basepath/build/$id/ios");
-
+						case 6: // Prepare android git repo
+                        /*shell_exec("/usr/bin/git init $basepath/build/$id/and");
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
-                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
-
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git checkout -b and$id");
-                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git checkout -b ios$id");
-
                         shell_exec("cd $basepath/build/$id/and ; /usr/bin/git add -A");
-                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git add -A");
-
-                        shell_exec("cd $basepath/build/$id/and ; /usr/bin/git commit -m \"and$id\"");
-                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git commit -m \"ios$id\"");
-
-                        shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");
-                        //shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id");
+						shell_exec("cd $basepath/build/$id/and ; /usr/bin/git commit -m \"and$id\"");
+						shell_exec("cd $basepath/build/$id/and ; /usr/bin/git push -u origin and$id");*/
+						
+						// Prepare ios git repo
+                        /*shell_exec("/usr/bin/git init $basepath/build/$id/ios");
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git remote add origin git@github.com:ypshukla/phonegapbuild.git");
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git checkout -b ios$id");
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git add -A");
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git commit -m \"ios$id\"");
+                        shell_exec("cd $basepath/build/$id/ios ; /usr/bin/git push -u origin ios$id");*/
 
                         //shell_exec("/bin/rm -rf $appsource");
 
