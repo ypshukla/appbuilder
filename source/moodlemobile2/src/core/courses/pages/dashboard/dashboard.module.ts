@@ -19,9 +19,8 @@ import { CoreCoursesDashboardPage } from './dashboard';
 import { CoreComponentsModule } from '@components/components.module';
 import { CoreDirectivesModule } from '@directives/directives.module';
 import { CoreCoursesComponentsModule } from '../../components/components.module';
-import { AddonBlockMyOverviewModule } from '@addon/block/myoverview/myoverview.module';
-import { AddonBlockTimelineModule } from '@addon/block/timeline/timeline.module';
 import { CoreSiteHomeComponentsModule } from '@core/sitehome/components/components.module';
+import { CoreBlockComponentsModule } from '@core/block/components/components.module';
 
 @NgModule({
     declarations: [
@@ -32,8 +31,7 @@ import { CoreSiteHomeComponentsModule } from '@core/sitehome/components/componen
         CoreDirectivesModule,
         CoreCoursesComponentsModule,
         CoreSiteHomeComponentsModule,
-        AddonBlockMyOverviewModule,
-        AddonBlockTimelineModule,
+        CoreBlockComponentsModule,
         IonicPageModule.forChild(CoreCoursesDashboardPage),
         TranslateModule.forChild()
     ],

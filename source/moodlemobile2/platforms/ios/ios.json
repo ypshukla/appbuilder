@@ -9,13 +9,13 @@
         "parents": {
           "/manifest/application/activity[@android:name='MainActivity']": [
             {
-              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"true\" />",
+              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"false\" />",
               "count": 1,
               "mode": "merge",
               "id": "config.xml",
               "oldAttrib": {
                 "android:configChanges": "orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize",
-                "android:debuggable": "true",
+                "android:debuggable": "false",
                 "android:label": "@string/activity_name",
                 "android:launchMode": "singleTop",
                 "android:name": "MainActivity",
@@ -144,7 +144,7 @@
           ],
           "CFBundleURLTypes": [
             {
-              "xml": "<array><dict><key>CFBundleURLSchemes</key><array><string>moodlemobile</string></array></dict></array>",
+              "xml": "<array><dict><key>CFBundleURLSchemes</key><array><string>timesmobile</string></array></dict></array>",
               "count": 1
             }
           ],
@@ -197,37 +197,10 @@
             }
           ]
         }
-      },
-      "app/src/main/AndroidManifest.xml": {
-        "parents": {
-          "/manifest/application/activity[@android:name='MainActivity']": [
-            {
-              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"true\" />",
-              "count": 1,
-              "mode": "merge",
-              "id": "config.xml"
-            }
-          ]
-        }
-      },
-      "platforms/android/app/src/main/AndroidManifest.xml": {
-        "parents": {
-          "/manifest/application/activity[@android:name='MainActivity']": [
-            {
-              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"true\" />",
-              "count": 1,
-              "mode": "merge",
-              "id": "config.xml"
-            }
-          ]
-        }
       }
     }
   },
   "installed_plugins": {
-    "com-darryncampbell-cordova-plugin-intent": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
-    },
     "cordova-android-support-gradle-release": {
       "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
     },
@@ -249,7 +222,7 @@
       "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
     },
     "cordova-plugin-customurlscheme": {
-      "URL_SCHEME": "moodlemobile",
+      "URL_SCHEME": "timesmobile",
       "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
     },
     "cordova-plugin-device": {
@@ -310,14 +283,6 @@
   },
   "dependent_plugins": {},
   "modules": [
-    {
-      "id": "com-darryncampbell-cordova-plugin-intent.IntentShim",
-      "file": "plugins/com-darryncampbell-cordova-plugin-intent/www/IntentShim.js",
-      "pluginId": "com-darryncampbell-cordova-plugin-intent",
-      "clobbers": [
-        "intentShim"
-      ]
-    },
     {
       "id": "cordova-clipboard.Clipboard",
       "file": "plugins/cordova-clipboard/www/clipboard.js",
@@ -761,7 +726,6 @@
     }
   ],
   "plugin_metadata": {
-    "com-darryncampbell-cordova-plugin-intent": "1.1.1",
     "cordova-android-support-gradle-release": "1.4.5",
     "cordova-clipboard": "1.2.1",
     "cordova-plugin-app-event": "1.2.1",

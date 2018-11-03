@@ -133,5 +133,5 @@
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize" android:debuggable="false" />
     </edit-config>
     <engine name="android" spec="7.0.0" />
-    <engine name="ios" spec="4.5.4" />
+    <engine name="ios" spec="4.5.5" />
 </widget>

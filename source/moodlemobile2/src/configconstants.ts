@@ -74,6 +74,6 @@ export class CoreConfigConstants {
     static skipssoconfirmation = false;
     static forcedefaultlanguage = false;
     static privacypolicy = 'https://www.keytoschool.com/privacy-policy/';
-    static compilationtime = 1539765382582;
-    static lastcommit = 'b12faa5033bf11f6817590fa884a3e2257923a67';
+    static compilationtime = 1541159005463;
+    static lastcommit = '01eaffa3de4517360638fa1b4db6e610dbf849d0';
 }

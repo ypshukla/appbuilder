@@ -7,9 +7,6 @@
     "files": {}
   },
   "installed_plugins": {
-    "com-darryncampbell-cordova-plugin-intent": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
-    },
     "cordova-android-support-gradle-release": {
       "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
     },
@@ -25,7 +22,7 @@
       "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
     },
     "cordova-plugin-customurlscheme": {
-      "URL_SCHEME": "moodlemobile",
+      "URL_SCHEME": "timesmobile",
       "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
     },
     "cordova-plugin-device": {

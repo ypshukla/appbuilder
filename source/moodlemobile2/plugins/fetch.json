@@ -135,7 +135,7 @@
     },
     "is_top_level": true,
     "variables": {
-      "URL_SCHEME": "moodlemobile",
+      "URL_SCHEME": "timesmobile",
       "ANDROID_SCHEME": " ",
       "ANDROID_HOST": " ",
       "ANDROID_PATHPREFIX": "/"
@@ -177,14 +177,6 @@
     "source": {
       "type": "registry",
       "id": "cordova-plugin-file-opener2@^2.0.19"
-    },
-    "is_top_level": true,
-    "variables": {}
-  },
-  "com-darryncampbell-cordova-plugin-intent": {
-    "source": {
-      "type": "registry",
-      "id": "com-darryncampbell-cordova-plugin-intent@^1.1.0"
     },
     "is_top_level": true,
     "variables": {}

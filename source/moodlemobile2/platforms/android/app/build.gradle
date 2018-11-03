@@ -91,9 +91,9 @@ ext {
 }
 
 // PLUGIN GRADLE EXTENSIONS START
-apply from: "../phonegap-plugin-push/cmoodleapp55-push.gradle"
-apply from: "../cordova-plugin-badge/cmoodleapp55-badge.gradle"
-apply from: "../cordova-android-support-gradle-release/cmoodleapp55-cordova-android-support-gradle-release.gradle"
+apply from: "../phonegap-plugin-push/cmoodleapp150-push.gradle"
+apply from: "../cordova-plugin-badge/cmoodleapp150-badge.gradle"
+apply from: "../cordova-android-support-gradle-release/cmoodleapp150-cordova-android-support-gradle-release.gradle"
 // PLUGIN GRADLE EXTENSIONS END
 
 def hasBuildExtras = file('build-extras.gradle').exists()
@@ -266,7 +266,6 @@ dependencies {
     compile "com.android.support:support-v13:27.1.0"
     compile "com.google.android.gms:play-services-gcm:15+"
     compile "me.leolin:ShortcutBadger:1.1.14@aar"
-    compile "com.android.support:support-v4:27.1.0"
     compile "com.android.support:support-v4:27.1.0"
     compile "com.android.support:support-v4:27.1.0"
     // SUB-PROJECT DEPENDENCIES END

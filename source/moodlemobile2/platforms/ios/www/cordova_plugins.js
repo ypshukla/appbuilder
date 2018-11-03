@@ -1,14 +1,6 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
   {
-    "id": "com-darryncampbell-cordova-plugin-intent.IntentShim",
-    "file": "plugins/com-darryncampbell-cordova-plugin-intent/www/IntentShim.js",
-    "pluginId": "com-darryncampbell-cordova-plugin-intent",
-    "clobbers": [
-      "intentShim"
-    ]
-  },
-  {
     "id": "cordova-clipboard.Clipboard",
     "file": "plugins/cordova-clipboard/www/clipboard.js",
     "pluginId": "cordova-clipboard",
@@ -453,7 +445,6 @@ module.exports = [
 module.exports.metadata = 
 // TOP OF METADATA
 {
-  "com-darryncampbell-cordova-plugin-intent": "1.1.1",
   "cordova-android-support-gradle-release": "1.4.5",
   "cordova-clipboard": "1.2.1",
   "cordova-plugin-app-event": "1.2.1",

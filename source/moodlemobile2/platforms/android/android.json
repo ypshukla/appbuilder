@@ -9,13 +9,13 @@
         "parents": {
           "/manifest/application/activity[@android:name='MainActivity']": [
             {
-              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"true\" />",
+              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"false\" />",
               "count": 1,
               "mode": "merge",
               "id": "config.xml",
               "oldAttrib": {
                 "android:configChanges": "orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize",
-                "android:debuggable": "true",
+                "android:debuggable": "false",
                 "android:label": "@string/activity_name",
                 "android:launchMode": "singleTop",
                 "android:name": "MainActivity",
@@ -96,14 +96,6 @@
             {
               "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
               "count": 1
-            },
-            {
-              "xml": "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />",
-              "count": 1
-            },
-            {
-              "xml": "<uses-permission android:name=\"android.permission.REQUEST_INSTALL_PACKAGES\" />",
-              "count": 1
             }
           ],
           "/manifest/application": [
@@ -166,23 +158,15 @@
             {
               "xml": "<provider android:authorities=\"${applicationId}.opener.provider\" android:exported=\"false\" android:grantUriPermissions=\"true\" android:name=\"io.github.pwlin.cordova.plugins.fileopener2.FileProvider\"><meta-data android:name=\"android.support.FILE_PROVIDER_PATHS\" android:resource=\"@xml/opener_paths\" /></provider>",
               "count": 1
-            },
-            {
-              "xml": "<provider android:authorities=\"${applicationId}.darryncampbell.cordova.plugin.intent.fileprovider\" android:exported=\"false\" android:grantUriPermissions=\"true\" android:name=\"android.support.v4.content.FileProvider\"><meta-data android:name=\"android.support.FILE_PROVIDER_PATHS\" android:resource=\"@xml/provider_paths\" /></provider>",
-              "count": 1
             }
           ],
           "/manifest/application/activity": [
             {
-              "xml": "<intent-filter><action android:name=\"android.intent.action.VIEW\" /><category android:name=\"android.intent.category.DEFAULT\" /><category android:name=\"android.intent.category.BROWSABLE\" /><data android:scheme=\"moodlemobile\" /></intent-filter>",
+              "xml": "<intent-filter><action android:name=\"android.intent.action.VIEW\" /><category android:name=\"android.intent.category.DEFAULT\" /><category android:name=\"android.intent.category.BROWSABLE\" /><data android:scheme=\"timesmobile\" /></intent-filter>",
               "count": 1
             },
             {
               "xml": "<intent-filter><action android:name=\"android.intent.action.VIEW\" /><category android:name=\"android.intent.category.DEFAULT\" /><category android:name=\"android.intent.category.BROWSABLE\" /><data android:host=\" \" android:pathPrefix=\"/\" android:scheme=\" \" /></intent-filter>",
-              "count": 1
-            },
-            {
-              "xml": "<intent-filter><action android:name=\"com.darryncampbell.cordova.plugin.intent.ACTION\" /><category android:name=\"android.intent.category.DEFAULT\" /></intent-filter>",
               "count": 1
             }
           ]
@@ -264,10 +248,6 @@
               "count": 1
             },
             {
-              "xml": "<feature name=\"IntentShim\"><param name=\"android-package\" value=\"com.darryncampbell.cordova.plugin.intent.IntentShim\" /><param name=\"onload\" value=\"true\" /></feature>",
-              "count": 1
-            },
-            {
               "xml": "<feature name=\"SQLitePlugin\"><param name=\"android-package\" value=\"io.sqlc.SQLitePlugin\" /></feature>",
               "count": 1
             },
@@ -293,120 +273,84 @@
             }
           ]
         }
-      },
-      "app/src/main/AndroidManifest.xml": {
-        "parents": {
-          "/manifest/application/activity[@android:name='MainActivity']": [
-            {
-              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"true\" />",
-              "count": 1,
-              "mode": "merge",
-              "id": "config.xml",
-              "oldAttrib": {
-                "android:configChanges": "orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize",
-                "android:debuggable": "true",
-                "android:label": "@string/activity_name",
-                "android:launchMode": "singleTop",
-                "android:name": "MainActivity",
-                "android:theme": "@android:style/Theme.DeviceDefault.NoActionBar",
-                "android:windowSoftInputMode": "adjustResize"
-              }
-            }
-          ]
-        }
-      },
-      "platforms/android/app/src/main/AndroidManifest.xml": {
-        "parents": {
-          "/manifest/application/activity[@android:name='MainActivity']": [
-            {
-              "xml": "<activity android:configChanges=\"orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize\" android:debuggable=\"true\" />",
-              "count": 1,
-              "mode": "merge",
-              "id": "config.xml"
-            }
-          ]
-        }
       }
     }
   },
   "installed_plugins": {
     "cordova-plugin-file": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-file-transfer": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-camera": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-media-capture": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-device": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-globalization": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-inappbrowser": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-network-information": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-statusbar": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-whitelist": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-splashscreen": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-clipboard": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "nl.kingsquare.cordova.background-audio": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "phonegap-plugin-push": {
       "SENDER_ID": "578987199728",
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-customurlscheme": {
-      "URL_SCHEME": "moodlemobile",
+      "URL_SCHEME": "timesmobile",
       "ANDROID_SCHEME": " ",
       "ANDROID_HOST": " ",
       "ANDROID_PATHPREFIX": "/",
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "ionic-plugin-keyboard": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-zip": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-app-event": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-local-notifications-mm": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-file-opener2": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
-    },
-    "com-darryncampbell-cordova-plugin-intent": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-sqlite-evcore-extbuild-free": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-plugin-badge": {
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     },
     "cordova-android-support-gradle-release": {
       "ANDROID_SUPPORT_VERSION": "27.1.0",
-      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp55"
+      "PACKAGE_NAME": "com.vidyamantra.cmoodleapp150"
     }
   },
   "dependent_plugins": {},
@@ -843,14 +787,6 @@
       ]
     },
     {
-      "id": "com-darryncampbell-cordova-plugin-intent.IntentShim",
-      "file": "plugins/com-darryncampbell-cordova-plugin-intent/www/IntentShim.js",
-      "pluginId": "com-darryncampbell-cordova-plugin-intent",
-      "clobbers": [
-        "intentShim"
-      ]
-    },
-    {
       "id": "cordova-sqlite-evcore-extbuild-free.SQLitePlugin",
       "file": "plugins/cordova-sqlite-evcore-extbuild-free/www/SQLitePlugin.js",
       "pluginId": "cordova-sqlite-evcore-extbuild-free",
@@ -888,7 +824,6 @@
     "cordova-plugin-app-event": "1.2.1",
     "cordova-plugin-local-notifications-mm": "1.0.13",
     "cordova-plugin-file-opener2": "2.0.19",
-    "com-darryncampbell-cordova-plugin-intent": "1.1.1",
     "cordova-sqlite-evcore-extbuild-free": "0.9.8",
     "cordova-plugin-badge": "0.8.7",
     "cordova-android-support-gradle-release": "1.4.5"

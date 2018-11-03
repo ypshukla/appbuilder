@@ -432,14 +432,6 @@ module.exports = [
     ]
   },
   {
-    "id": "com-darryncampbell-cordova-plugin-intent.IntentShim",
-    "file": "plugins/com-darryncampbell-cordova-plugin-intent/www/IntentShim.js",
-    "pluginId": "com-darryncampbell-cordova-plugin-intent",
-    "clobbers": [
-      "intentShim"
-    ]
-  },
-  {
     "id": "cordova-sqlite-evcore-extbuild-free.SQLitePlugin",
     "file": "plugins/cordova-sqlite-evcore-extbuild-free/www/SQLitePlugin.js",
     "pluginId": "cordova-sqlite-evcore-extbuild-free",
@@ -479,7 +471,6 @@ module.exports.metadata =
   "cordova-plugin-app-event": "1.2.1",
   "cordova-plugin-local-notifications-mm": "1.0.13",
   "cordova-plugin-file-opener2": "2.0.19",
-  "com-darryncampbell-cordova-plugin-intent": "1.1.1",
   "cordova-sqlite-evcore-extbuild-free": "0.9.8",
   "cordova-plugin-badge": "0.8.7",
   "cordova-android-support-gradle-release": "1.4.5"
